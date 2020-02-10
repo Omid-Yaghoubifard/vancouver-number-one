@@ -42,5 +42,23 @@ router.delete("/index/:id", function(req,res){
     res.render("home");
 })
 
+//signup
+router.get("/signup", function(req,res){
+    res.render("signup");
+})
+
+router.post("/signup", function(req,res){
+    res.redirect("/");
+})
+
+//login
+router.get("/login", function(req,res){
+    res.render("login");
+})
+
+router.post("/login", function(req,res){
+    res.redirect("/");
+})
+
 module.exports = router
 

@@ -1,0 +1,23 @@
+<%- include("partials/header") %>
+
+<div class="container ">
+    <h5>Sign up with you email address</h5>
+
+    <form method="POST" action="/signup">
+        <div class="form-group">
+          <label for="emailAdress">Email address</label>
+          <input type="email" name="email" class="form-control" id="emailAdress" aria-describedby="emailHelp" placeholder="Email address" required>
+        </div>
+        <div class="form-group">
+          <label for="yourPassword">Password</label>
+          <input type="password" name="password" class="form-control" id="yourPassword" placeholder="Choose a password" minlength="8" required>
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Your Password</label>
+            <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" placeholder="Re-enter your password" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary">SIGN UP</button>
+      </form>
+</div>
+
+<%- include("partials/footer") %>
