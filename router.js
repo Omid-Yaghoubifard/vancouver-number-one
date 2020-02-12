@@ -48,8 +48,21 @@ router.get("/signup", function(req,res){
 })
 
 router.post("/signup", function(req,res){
-    res.redirect("/");
-})
+    if(req.body.password1 != req.body.password2) {
+        res.redirect("/signup");
+    } else {
+        User.register({username:req.body.email}, req.body.password1, function(err, user) {
+        if(err) 
+            {console.log(err);
+        }
+        const authenticate = User.authenticate();
+        authenticate("username", "password", function(err, result) {
+          if (err) {console.log(err)} else {
+            res.redirect("/");
+          }
+        });
+    });
+}})
 
 //login
 router.get("/login", function(req,res){
@@ -57,8 +70,15 @@ router.get("/login", function(req,res){
 })
 
 router.post("/login", function(req,res){
-    res.redirect("/");
-})
+    const authenticate = User.authenticate();
+    authenticate("username", "password", function(err, result) {
+    if (err){
+        console.log(err);
+    } else {
+        res.redirect("/index");
+    }
+   });
+});
 
 module.exports = router
 

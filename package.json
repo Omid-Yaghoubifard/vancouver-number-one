@@ -25,6 +25,7 @@
     "passport-local-mongoose": "^5.0.1"
   },
   "dependencies": {
+    "alert-node": "^2.1.4",
     "dotenv": "^8.2.0",
     "method-override": "^3.0.0"
   }
