@@ -1,5 +1,17 @@
-const express = require("express"),
-      router  = express.Router();
+const express  = require("express"),
+      router   = express.Router(),
+      passport = require("passport"),
+      User     = require("./models/user");
+
+// check isLoggedIn
+function isLoggedIn(req, res, next) {
+    console.log(req.session);
+    if (req.user) {
+        next();
+    } else {
+        res.redirect("/login");
+    }
+};
 
 // homepage
 router.get("/", function(req, res) {
@@ -12,8 +24,12 @@ router.get("/index", function(req, res){
 })
 
 // new
-router.get("/index/new", function(req, res){
-    res.render("new");
+// router.get("/index/new", isLoggedIn, function(req, res){
+//     res.render("new");
+// })
+
+router.get("/index/new", isLoggedIn, function(req, res){
+    res.redirect("/secret");
 })
 
 // create
@@ -47,38 +63,48 @@ router.get("/signup", function(req,res){
     res.render("signup");
 })
 
-router.post("/signup", function(req,res){
-    if(req.body.password1 != req.body.password2) {
+router.post("/signup", function(req, res) {
+    if(req.body.password != req.body.password2) {
         res.redirect("/signup");
     } else {
-        User.register({username:req.body.email}, req.body.password1, function(err, user) {
-        if(err) 
-            {console.log(err);
-        }
-        const authenticate = User.authenticate();
-        authenticate("username", "password", function(err, result) {
-          if (err) {console.log(err)} else {
-            res.redirect("/");
-          }
+    User.register(new User({ username : req.body.username }), req.body.password, function(err, newUser) {
+        if (err) {
+            console.log(err);
+            res.render("signup", {info: "Sorry. That username already exists. Try again."});
+        } else {
+        User.findOne({ username:req.body.username }, function (err, foundUser) {
+            if (err) {
+                console.log(err);
+            } else
+                foundUser.email = req.body.email;
+                foundUser.save();
+        })
+        passport.authenticate("local")(req, res, function () {
+          res.redirect("/secret");
         });
-    });
-}})
+    }});
+}});
 
 //login
 router.get("/login", function(req,res){
     res.render("login");
-})
+});
 
 router.post("/login", function(req,res){
-    const authenticate = User.authenticate();
-    authenticate("username", "password", function(err, result) {
-    if (err){
-        console.log(err);
-    } else {
-        res.redirect("/index");
-    }
-   });
+    passport.authenticate("local")(req, res, function () {
+    res.redirect("/secret");
+    })
+});
+
+
+// logout
+router.get("/logout", function(req,res){
+    req.logout();
+    res.redirect("/");
+});
+
+router.get("/secret", isLoggedIn, function(req,res){
+    res.send("This is the secret page!")
 });
 
 module.exports = router
-

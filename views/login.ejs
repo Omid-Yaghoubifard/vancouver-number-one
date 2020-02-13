@@ -1,16 +1,16 @@
 <%- include("partials/header") %>
 
 <div class="container">
-    <h5>Log in with you email address</h5>
+    <h5>Log In Now!</h5>
 
     <form method="POST" action="/login">
         <div class="form-group">
-        <label for="emailAdress">Email address</label>
-        <input type="email" name="email" class="form-control" id="emailAdress" aria-describedby="emailHelp" placeholder="Enter your email" required>
+            <label for="username">Username</label>
+            <input type="text" name="username" class="form-control" id="username" placeholder="Enter your username" required>
         </div>
         <div class="form-group">
-        <label for="yourPassword">Password</label>
-        <input type="password" name="password" class="form-control" id="yourPassword" placeholder="Enter your password" required>
+            <label for="yourPassword">Password</label>
+            <input type="password" name="password" class="form-control" id="yourPassword" placeholder="Enter your password" required>
         </div>
         <button type="submit" class="btn btn-primary">LOG IN</button>
     </form>
