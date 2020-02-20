@@ -1,12 +1,14 @@
                               require("dotenv").config();
 const express               = require("express"),
       bodyParser            = require("body-parser"),
+      multer                = require("multer"),
       mongoose              = require("mongoose"),
       ejs                   = require("ejs"),
       session               = require("express-session"),
       router                = require("./router"),
       passport              = require("passport"),
-      passportLocalMongoose = require("passport-local-mongoose");
+      passportLocalMongoose = require("passport-local-mongoose"),
+      post                  = require("./models/post.js");
 
 const app = express();
 

@@ -1,17 +1,32 @@
-const express  = require("express"),
-      router   = express.Router(),
-      passport = require("passport"),
-      User     = require("./models/user");
+const express    = require("express"),
+      router     = express.Router(),
+      bodyParser = require("body-parser"),
+      multer     = require("multer"),
+      passport   = require("passport"),
+      User       = require("./models/user"),
+      Post       = require("./models/post");
 
 // check isLoggedIn
 function isLoggedIn(req, res, next) {
-    console.log(req.session);
+    // console.log(req.session);
     if (req.user) {
         next();
     } else {
         res.redirect("/login");
     }
 };
+
+// image storage
+const Storage = multer.diskStorage({
+    destination: function(req, file, callback) {
+        callback(null, "./public/images");
+    },
+    filename: function(req, file, callback) {
+        callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
+    }
+});
+
+var upload = multer({storage: Storage});
 
 // homepage
 router.get("/", function(req, res) {
@@ -24,19 +39,24 @@ router.get("/index", function(req, res){
 })
 
 // new
-// router.get("/index/new", isLoggedIn, function(req, res){
-//     res.render("new");
-// })
-
 router.get("/index/new", isLoggedIn, function(req, res){
-    res.redirect("/secret");
+    res.render("new");
 })
 
 // create
-router.post("/index", function(req, res){
-
-    res.redirect("/index");
-})
+router.post("/index", upload.single("image"), function(req, res){
+    let fullPost = req.body.newPost;
+    fullPost.author = req.user._id;
+    fullPost.image = req.file.path;
+    Post.create(
+        fullPost, function (err, post) { 
+            if(err){
+                res.redirect("/index/new")
+            } else{
+                res.redirect("/index");
+            }
+    });
+});
 
 // show
 router.get("/index/:id", function(req, res){
@@ -80,7 +100,7 @@ router.post("/signup", function(req, res) {
                 foundUser.save();
         })
         passport.authenticate("local")(req, res, function () {
-          res.redirect("/secret");
+          res.redirect("/");
         });
     }});
 }});
@@ -90,12 +110,10 @@ router.get("/login", function(req,res){
     res.render("login");
 });
 
-router.post("/login", function(req,res){
-    passport.authenticate("local")(req, res, function () {
-    res.redirect("/secret");
-    })
-});
-
+router.post("/login", passport.authenticate("local", { 
+    successRedirect:"/",
+    failureRedirect: "/login"
+}));
 
 // logout
 router.get("/logout", function(req,res){
@@ -103,8 +121,8 @@ router.get("/logout", function(req,res){
     res.redirect("/");
 });
 
-router.get("/secret", isLoggedIn, function(req,res){
-    res.send("This is the secret page!")
-});
+// router.get("/secret", isLoggedIn, function(req,res){
+//     res.send("This is the secret page!")
+// });
 
 module.exports = router
