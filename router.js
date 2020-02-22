@@ -35,13 +35,19 @@ router.get("/", function(req, res) {
 
 // index
 router.get("/index", function(req, res){
-    res.render("index");
-})
+    Post.find({}, function(err, posts){
+        if(!err){
+            res.render("index", {posts: posts});
+        } else{
+            res.redirect("/");
+        }
+    })
+});
 
 // new
 router.get("/index/new", isLoggedIn, function(req, res){
     res.render("new");
-})
+});
 
 // create
 router.post("/index", upload.single("image"), function(req, res){
@@ -60,28 +66,34 @@ router.post("/index", upload.single("image"), function(req, res){
 
 // show
 router.get("/index/:id", function(req, res){
-    res.render("show");
-})
+    Post.findById(req.params.id).populate("author").exec(function(err, post){
+        if(!err){
+            res.render("show", {post: post});
+        } else{
+            res.redirect("/index");
+        }
+    })
+});
 
 // edit
 router.get("/index/:id/edit", function(req, res){
     res.render("edit");
-})
+});
 
 // update
 router.put("/index/:id", function(req, res){
     res.render("home");
-})
+});
 
 // delete
 router.delete("/index/:id", function(req,res){
     res.render("home");
-})
+});
 
 //signup
 router.get("/signup", function(req,res){
     res.render("signup");
-})
+});
 
 router.post("/signup", function(req, res) {
     if(req.body.password != req.body.password2) {

@@ -1,10 +1,28 @@
 <%- include("partials/header") %>
 
-
-
-
-
-
-
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card-deck">
+                <div class="card">
+                <a href="/index/<%= post._id %>"><img class="card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
+                <div class="card-body">
+                    <h5 class="card-title"><%= post.title %></h5>
+                    <p class="card-text"><%= post.body %> </p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted"> Created by <%= post.author[0].username %> in <%= post.date.toLocaleDateString() %> </small>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div>External link:</div>
+            <div>
+                <a href="<%= post.url %>"><%= post.title %></a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <%- include("partials/footer") %>

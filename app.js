@@ -15,6 +15,8 @@ const app = express();
 app.set ("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
+app.use("/public/images", express.static(__dirname + "/public/images"));
+app.use("/index/public/images", express.static(__dirname + "/public/images"));
 
 app.use(session({
   secret: process.env.SECRET,
