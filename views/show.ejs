@@ -10,9 +10,16 @@
                     <h5 class="card-title"><%= post.title %></h5>
                     <p class="card-text"><%= post.body %> </p>
                 </div>
-                <div class="card-footer">
-                    <small class="text-muted"> Created by <%= post.author[0].username %> in <%= post.date.toLocaleDateString() %> </small>
-                </div>
+
+                <% if(!user || (user.username!=post.author[0].username)){ %>
+                    <div class="card-footer">
+                        <small class="text-muted"> Created by <%= post.author[0].username %> in <%= post.date.toLocaleDateString() %> </small>
+                    </div>
+                <% } else{ %>
+                    <a class="btn btn-primary" href="/index/<%= post._id %>/edit">Edit</a>
+                    <a class="btn btn-danger" href="/index/<%= post._id %>/delete">Delete</a>
+                <% }; %>
+
                 </div>
             </div>
         </div>

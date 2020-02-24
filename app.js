@@ -8,6 +8,7 @@ const express               = require("express"),
       router                = require("./router"),
       passport              = require("passport"),
       passportLocalMongoose = require("passport-local-mongoose"),
+      methodOverride        = require("method-override"),
       post                  = require("./models/post.js");
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
 app.use("/public/images", express.static(__dirname + "/public/images"));
 app.use("/index/public/images", express.static(__dirname + "/public/images"));
+app.use(methodOverride("_method"));
 
 app.use(session({
   secret: process.env.SECRET,
@@ -29,6 +31,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 mongoose.connect("mongodb://localhost:27017/Vancouver_number_one", {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.set("useFindAndModify", false);
 
 app.use(router);
 

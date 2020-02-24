@@ -1,18 +1,27 @@
-const express    = require("express"),
-      router     = express.Router(),
-      bodyParser = require("body-parser"),
-      multer     = require("multer"),
-      passport   = require("passport"),
-      User       = require("./models/user"),
-      Post       = require("./models/post");
+const express        = require("express"),
+      router         = express.Router(),
+      bodyParser     = require("body-parser"),
+      multer         = require("multer"),
+      passport       = require("passport"),
+      methodOverride = require("method-override"),
+      User           = require("./models/user"),
+      Post           = require("./models/post");
 
 // check isLoggedIn
 function isLoggedIn(req, res, next) {
-    // console.log(req.session);
     if (req.user) {
         next();
     } else {
         res.redirect("/login");
+    }
+};
+
+// check isNotLoggedIn
+function isNotLoggedIn(req, res, next) {
+    if (!req.user) {
+        next();
+    } else {
+        res.redirect("/");
     }
 };
 
@@ -30,14 +39,14 @@ var upload = multer({storage: Storage});
 
 // homepage
 router.get("/", function(req, res) {
-    res.render("home");
+    res.render("home", {user: req.user});   
 });
 
 // index
 router.get("/index", function(req, res){
     Post.find({}, function(err, posts){
         if(!err){
-            res.render("index", {posts: posts});
+            res.render("index", {posts: posts, user: req.user});
         } else{
             res.redirect("/");
         }
@@ -46,11 +55,11 @@ router.get("/index", function(req, res){
 
 // new
 router.get("/index/new", isLoggedIn, function(req, res){
-    res.render("new");
+    res.render("new", {user: req.user});
 });
 
 // create
-router.post("/index", upload.single("image"), function(req, res){
+router.post("/index", isLoggedIn, upload.single("image"), function(req, res){
     let fullPost = req.body.newPost;
     fullPost.author = req.user._id;
     fullPost.image = req.file.path;
@@ -68,7 +77,7 @@ router.post("/index", upload.single("image"), function(req, res){
 router.get("/index/:id", function(req, res){
     Post.findById(req.params.id).populate("author").exec(function(err, post){
         if(!err){
-            res.render("show", {post: post});
+            res.render("show", {post: post, user: req.user});
         } else{
             res.redirect("/index");
         }
@@ -76,26 +85,67 @@ router.get("/index/:id", function(req, res){
 });
 
 // edit
-router.get("/index/:id/edit", function(req, res){
-    res.render("edit");
+router.get("/index/:id/edit", isLoggedIn, function(req, res){
+    Post.findById(req.params.id).populate("author").exec(function(err, post){
+        if(req.user.username === post.author[0].username){
+            res.render("edit", {user: req.user, post: post})
+        } else{
+            res.redirect("/index/"+req.params.id);
+    }})
 });
 
 // update
-router.put("/index/:id", function(req, res){
-    res.render("home");
+router.put("/index/:id", isLoggedIn, upload.single("image"), function(req, res){
+    Post.findById(req.params.id).populate("author").exec(function(err, post){
+        if(req.user.username === post.author[0].username){
+            let editedPost = req.body.editPost;
+                Post.findByIdAndUpdate(req.params.id, editedPost, function(err, modified){
+                    if(req.file != undefined){
+                        Post.findByIdAndUpdate(req.params.id, {image: req.file.path}, function(err, modifiedImage){
+                            res.redirect("/index/"+req.params.id)
+                        })   
+                    }else{
+                        res.redirect("/index/"+req.params.id);
+        }})
+        } else{
+            res.redirect("/index/"+req.params.id);
+    }
+    })
 });
 
 // delete
-router.delete("/index/:id", function(req,res){
-    res.render("home");
+router.get("/index/:id/delete", isLoggedIn, function(req,res){
+    Post.findById(req.params.id).populate("author").exec(function(err, post){
+        if(req.user.username === post.author[0].username){
+            res.render("delete", {user: req.user, post: post})
+        } else{
+            res.redirect("/index/"+req.params.id);
+        }
+    })
+});
+
+router.delete("/index/:id", isLoggedIn, function(req,res){
+    Post.findById(req.params.id).populate("author").exec(function(err, post){
+        if(req.user.username === post.author[0].username){
+            Post.findByIdAndRemove(req.params.id, function(err, post){
+                if(err){
+                    res.redirect("/index/"+req.params.id);
+                } else{
+                    res.redirect("/index");
+                }
+            });
+        } else{
+            res.redirect("/index/"+req.params.id);
+        }
+    })
 });
 
 //signup
-router.get("/signup", function(req,res){
-    res.render("signup");
+router.get("/signup", isNotLoggedIn, function(req,res){
+    res.render("signup", {user: req.user});
 });
 
-router.post("/signup", function(req, res) {
+router.post("/signup", isNotLoggedIn, function(req, res) {
     if(req.body.password != req.body.password2) {
         res.redirect("/signup");
     } else {
@@ -118,23 +168,19 @@ router.post("/signup", function(req, res) {
 }});
 
 //login
-router.get("/login", function(req,res){
-    res.render("login");
+router.get("/login", isNotLoggedIn, function(req,res){
+    res.render("login", {user: req.user});
 });
 
-router.post("/login", passport.authenticate("local", { 
+router.post("/login", isNotLoggedIn, passport.authenticate("local", { 
     successRedirect:"/",
     failureRedirect: "/login"
 }));
 
 // logout
-router.get("/logout", function(req,res){
+router.get("/logout", isLoggedIn, function(req,res){
     req.logout();
     res.redirect("/");
 });
-
-// router.get("/secret", isLoggedIn, function(req,res){
-//     res.send("This is the secret page!")
-// });
 
 module.exports = router
