@@ -8,13 +8,13 @@
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="card-deck">
                 <div class="card">
-                <a href="/index/<%= post._id %>"><img class="card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
+                <a href="/index/show/<%= post._id %>"><img class="card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
                 <div class="card-body">
                     <h5 class="card-title"><%= post.title %></h5>
                     <p class="card-text"><%= post.body.slice(0,100) %> ...</p>
                 </div>
                 <div class="card-footer">
-                    <small class="text-muted"><a href="/index/<%= post._id %>">Read more...</a></small>
+                    <small class="text-muted"><a href="/index/show/<%= post._id %>">Read more...</a></small>
                 </div>
                 </div>
             </div>
@@ -23,6 +23,36 @@
     <% }); %>
     
     </div>
+
+    <% if (pages > 1) { %>
+        <ul class="pagination text-center">
+            <% if (current == 1) { %>
+                <li class="disabled"><a>First</a></li>
+            <% } else { %>
+                <li><a href="/index/1">First </a></li>
+            <% } %>
+            <% let i = (Number(current) > 5 ? Number(current) - 4 : 1) %>
+            <% if (i !== 1) { %>
+                <li class="disabled"><a>...</a></li>
+            <% } %>
+            <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %>
+                <% if (i == current) { %>
+                    <li class="active"><a><%= i %></a></li>
+                <% } else { %>
+                    <li><a href="/index/<%= i %>"><%= i %></a></li>
+                <% } %>
+                <% if (i == Number(current) + 4 && i < pages) { %>
+                    <li class="disabled"><a>...</a></li>
+                <% } %>
+            <% } %>
+            <% if (current == pages) { %>
+                <li class="disabled"><a> Last</a></li>
+            <% } else { %>
+                <li><a href="/index/<%= pages %>"> Last</a></li>
+            <% } %>
+        </ul>
+    <% } %>
+
 </div>
 
 <%- include("partials/footer") %>

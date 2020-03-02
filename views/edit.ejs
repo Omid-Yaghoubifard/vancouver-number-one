@@ -2,7 +2,7 @@
 
 <div class="container mt-5">
     <h3 class="mb-4">Edit your post!</h3>
-    <form method="POST" action="/index/<%= post._id %>?_method=PUT" enctype="multipart/form-data">
+    <form method="POST" action="/index/show/<%= post._id %>?_method=PUT" enctype="multipart/form-data">
         <div class="row">
             <div class="input-group mb-3 col-md-8">
                 <input type="text" class="form-control" name="editPost[title]" value="<%= post.title %>" required>

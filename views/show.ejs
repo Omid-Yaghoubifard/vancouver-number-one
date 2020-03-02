@@ -5,7 +5,7 @@
         <div class="col-md-9">
             <div class="card-deck">
                 <div class="card">
-                <a href="/index/<%= post._id %>"><img class="card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
+                <a href="/index/show/<%= post._id %>"><img class="card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
                 <div class="card-body">
                     <h5 class="card-title"><%= post.title %></h5>
                     <p class="card-text"><%= post.body %> </p>
@@ -13,11 +13,11 @@
 
                 <% if(!user || (user.username!=post.author[0].username)){ %>
                     <div class="card-footer">
-                        <small class="text-muted"> Created by <%= post.author[0].username %> in <%= post.date.toLocaleDateString() %> </small>
+                        <small class="text-muted"> Created by <strong class="text-success"><%= post.author[0].username %></strong> on <%= post.date.toLocaleDateString() %> </small>
                     </div>
                 <% } else{ %>
-                    <a class="btn btn-primary" href="/index/<%= post._id %>/edit">Edit</a>
-                    <a class="btn btn-danger" href="/index/<%= post._id %>/delete">Delete</a>
+                    <a class="btn btn-primary" href="/index/show/<%= post._id %>/edit">Edit</a>
+                    <a class="btn btn-danger" href="/index/show/<%= post._id %>/delete">Delete</a>
                 <% }; %>
 
                 </div>
@@ -29,6 +29,41 @@
                 <a href="<%= post.url %>"><%= post.title %></a>
             </div>
         </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-9">
+            <div class="comment-wrapper">
+                <div class="panel panel-info">
+                    <div class="panel-body">
+                        <% if(user){ %>
+                            <form action="/index/show/<%= post._id %>" method="POST">
+                                <textarea class="form-control" placeholder="Write a comment..." rows="3" name="newComment[text]" required></textarea>
+                                <br>
+                                <button type="submit" class="btn btn-primary">Post Comment</button>
+                            </form>
+                        <% }else{ %>
+                            <a class="btn btn-primary" href="/login">Log in to leave a comment</a>
+                        <% } %>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <ul class="media-list">
+                            <li class="media">
+                                <div class="media-body">
+                                    <% post.comments.forEach(function(comment){ %>
+                                        <span class="text-muted pull-right">
+                                            <small class="text-muted"><%= comment.date.toLocaleDateString() %></small>
+                                        </span>
+                                        <strong class="text-success"><%= comment.author[0].username %></strong>
+                                        <p><%= comment.text %></p>
+                                    <% }); %>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>      
     </div>
 </div>
 

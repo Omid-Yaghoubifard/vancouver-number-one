@@ -5,25 +5,36 @@ const express        = require("express"),
       passport       = require("passport"),
       methodOverride = require("method-override"),
       User           = require("./models/user"),
-      Post           = require("./models/post");
+      Post           = require("./models/post"),
+      Comment        = require("./models/comment");
 
 // check isLoggedIn
-function isLoggedIn(req, res, next) {
-    if (req.user) {
+function isLoggedIn(req, res, next){
+    if (req.user){
         next();
-    } else {
+    } else{
         res.redirect("/login");
     }
 };
 
 // check isNotLoggedIn
-function isNotLoggedIn(req, res, next) {
-    if (!req.user) {
+function isNotLoggedIn(req, res, next){
+    if (!req.user){
         next();
-    } else {
-        res.redirect("/");
+    } else{
+        res.redirect("/index/1");
     }
 };
+
+// check loggedInUser
+function loggedInUser(req, res, next){
+    Post.findById(req.params.id).populate("author").exec(function(err, post){
+        if(req.user.username === post.author[0].username){
+            next();
+        } else{
+            res.redirect("/index/show/"+req.params.id);
+        }
+})};
 
 // image storage
 const Storage = multer.diskStorage({
@@ -42,20 +53,31 @@ router.get("/", function(req, res) {
     res.render("home", {user: req.user});   
 });
 
-// index
-router.get("/index", function(req, res){
-    Post.find({}, function(err, posts){
-        if(!err){
-            res.render("index", {posts: posts, user: req.user});
-        } else{
-            res.redirect("/");
-        }
-    })
-});
-
 // new
 router.get("/index/new", isLoggedIn, function(req, res){
     res.render("new", {user: req.user});
+});
+
+// index
+router.get("/index/:page", function(req, res, next) {
+    const perPage = 9;
+    const page = req.params.page || 1;
+
+    Post
+        .find({})
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec(function(err, posts) {
+            Post.countDocuments().exec(function(err, count) {
+                if (err) return next(err)
+                res.render("index", {
+                    posts: posts,
+                    current: page,
+                    pages: Math.ceil(count / perPage),
+                    user: req.user
+                })
+            })
+        })
 });
 
 // create
@@ -68,76 +90,73 @@ router.post("/index", isLoggedIn, upload.single("image"), function(req, res){
             if(err){
                 res.redirect("/index/new")
             } else{
-                res.redirect("/index");
+                res.redirect("/index/1");
             }
     });
 });
 
 // show
-router.get("/index/:id", function(req, res){
-    Post.findById(req.params.id).populate("author").exec(function(err, post){
+router.get("/index/show/:id", function(req, res){
+    Post.findById(req.params.id).populate("author").populate({path:"comments", populate: {path: "author", model: "User"}}).exec(function(err, post){
         if(!err){
             res.render("show", {post: post, user: req.user});
         } else{
-            res.redirect("/index");
+            res.redirect("/index/1");
         }
     })
 });
 
 // edit
-router.get("/index/:id/edit", isLoggedIn, function(req, res){
+router.get("/index/show/:id/edit", isLoggedIn, loggedInUser, function(req, res){
     Post.findById(req.params.id).populate("author").exec(function(err, post){
-        if(req.user.username === post.author[0].username){
-            res.render("edit", {user: req.user, post: post})
-        } else{
-            res.redirect("/index/"+req.params.id);
-    }})
+        res.render("edit", {user: req.user, post: post})
+    })
 });
 
 // update
-router.put("/index/:id", isLoggedIn, upload.single("image"), function(req, res){
-    Post.findById(req.params.id).populate("author").exec(function(err, post){
-        if(req.user.username === post.author[0].username){
-            let editedPost = req.body.editPost;
-                Post.findByIdAndUpdate(req.params.id, editedPost, function(err, modified){
-                    if(req.file != undefined){
-                        Post.findByIdAndUpdate(req.params.id, {image: req.file.path}, function(err, modifiedImage){
-                            res.redirect("/index/"+req.params.id)
-                        })   
-                    }else{
-                        res.redirect("/index/"+req.params.id);
-        }})
-        } else{
-            res.redirect("/index/"+req.params.id);
+router.put("/index/show/:id", isLoggedIn, loggedInUser, upload.single("image"), function(req, res){
+    let editedPost = req.body.editPost;
+    Post.findByIdAndUpdate(req.params.id, editedPost, function(err, modified){
+        if(req.file != undefined){
+            Post.findByIdAndUpdate(req.params.id, {image: req.file.path}, function(err, modifiedImage){
+                res.redirect("/index/show/"+req.params.id)
+            })   
+        }else{
+            res.redirect("/index/show/"+req.params.id);
     }
     })
 });
 
+//comment
+router.post("/index/show/:id", isLoggedIn, function(req,res){
+    let newComment = req.body.newComment;
+    newComment.author = req.user._id;
+    Comment.create(
+        newComment, function(err, createdComment){
+            if(!err){
+                Post.findByIdAndUpdate(req.params.id, {$push: {comments: createdComment._id}}, function(err, updated){
+                    res.redirect("/index/show/"+req.params.id);
+                })
+            } else{
+                res.redirect("/index/show/"+req.params.id);
+    }})
+});
+
 // delete
-router.get("/index/:id/delete", isLoggedIn, function(req,res){
+router.get("/index/show/:id/delete", isLoggedIn, loggedInUser, function(req,res){
     Post.findById(req.params.id).populate("author").exec(function(err, post){
-        if(req.user.username === post.author[0].username){
-            res.render("delete", {user: req.user, post: post})
-        } else{
-            res.redirect("/index/"+req.params.id);
-        }
+        res.render("delete", {user: req.user, post: post})
     })
 });
 
-router.delete("/index/:id", isLoggedIn, function(req,res){
-    Post.findById(req.params.id).populate("author").exec(function(err, post){
-        if(req.user.username === post.author[0].username){
-            Post.findByIdAndRemove(req.params.id, function(err, post){
-                if(err){
-                    res.redirect("/index/"+req.params.id);
-                } else{
-                    res.redirect("/index");
-                }
-            });
+router.delete("/index/show/:id", isLoggedIn, loggedInUser, function(req,res){
+    Post.findByIdAndRemove(req.params.id, function(err, post){
+        if(err){
+            res.redirect("/index/show/"+req.params.id);
         } else{
-            res.redirect("/index/"+req.params.id);
+            res.redirect("/index/1");
         }
-    })
+    });
 });
 
 //signup
@@ -162,7 +181,7 @@ router.post("/signup", isNotLoggedIn, function(req, res) {
                 foundUser.save();
         })
         passport.authenticate("local")(req, res, function () {
-          res.redirect("/");
+          res.redirect("/index/1");
         });
     }});
 }});
@@ -173,7 +192,7 @@ router.get("/login", isNotLoggedIn, function(req,res){
 });
 
 router.post("/login", isNotLoggedIn, passport.authenticate("local", { 
-    successRedirect:"/",
+    successRedirect:"/index/1",
     failureRedirect: "/login"
 }));
 

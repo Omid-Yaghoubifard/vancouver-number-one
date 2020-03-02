@@ -9,15 +9,16 @@ const express               = require("express"),
       passport              = require("passport"),
       passportLocalMongoose = require("passport-local-mongoose"),
       methodOverride        = require("method-override"),
-      post                  = require("./models/post.js");
+      Post                  = require("./models/post.js"),
+      Comment               = require("./models/comment.js");
 
 const app = express();
 
 app.set ("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
-app.use("/public/images", express.static(__dirname + "/public/images"));
 app.use("/index/public/images", express.static(__dirname + "/public/images"));
+app.use("/index/show/public/images", express.static(__dirname + "/public/images"));
 app.use(methodOverride("_method"));
 
 app.use(session({

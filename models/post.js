@@ -1,5 +1,6 @@
 const mongoose = require("mongoose"),
-      User     = require("./user");
+      User     = require("./user"),
+      Comment  = require("./comment");
 
 const Post = new mongoose.Schema({
     title: String,
@@ -13,9 +14,12 @@ const Post = new mongoose.Schema({
         enum: ["Natural", "Cultural", "Events", "Man-Made"]
     },
     image: String,
-    comments: [{ body: String, date: { type: Date, default: Date.now } }],
+    comments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment"
+    }],
     date: { type: Date, default: Date.now },
     url: String
-})
+});
 
 module.exports = mongoose.model("Post", Post);
