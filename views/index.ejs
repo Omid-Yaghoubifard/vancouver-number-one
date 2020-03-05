@@ -12,9 +12,7 @@
                 <div class="card-body">
                     <h5 class="card-title"><%= post.title %></h5>
                     <p class="card-text"><%= post.body.slice(0,100) %> ...</p>
-                </div>
-                <div class="card-footer">
-                    <small class="text-muted"><a href="/index/show/<%= post._id %>">Read more...</a></small>
+                    <a href="/index/show/<%= post._id %>" class= "btn btn-outline-success">Read more</a>
                 </div>
                 </div>
             </div>

@@ -9,6 +9,7 @@ const express               = require("express"),
       passport              = require("passport"),
       passportLocalMongoose = require("passport-local-mongoose"),
       methodOverride        = require("method-override"),
+      fetch                 = require("node-fetch"),
       Post                  = require("./models/post.js"),
       Comment               = require("./models/comment.js");
 

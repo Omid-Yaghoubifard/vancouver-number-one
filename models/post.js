@@ -19,7 +19,8 @@ const Post = new mongoose.Schema({
         ref: "Comment"
     }],
     date: { type: Date, default: Date.now },
-    url: String
+    url: String,
+    location: Array
 });
 
 module.exports = mongoose.model("Post", Post);

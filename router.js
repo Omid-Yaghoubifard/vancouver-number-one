@@ -6,6 +6,7 @@ const express        = require("express"),
       methodOverride = require("method-override"),
       User           = require("./models/user"),
       Post           = require("./models/post"),
+      fetch          = require("node-fetch"),
       Comment        = require("./models/comment");
 
 // check isLoggedIn
@@ -82,24 +83,30 @@ router.get("/index/:page", function(req, res, next) {
 
 // create
 router.post("/index", isLoggedIn, upload.single("image"), function(req, res){
-    let fullPost = req.body.newPost;
-    fullPost.author = req.user._id;
-    fullPost.image = req.file.path;
-    Post.create(
-        fullPost, function (err, post) { 
-            if(err){
-                res.redirect("/index/new")
-            } else{
-                res.redirect("/index/1");
-            }
-    });
+    fetch("https://api.mapbox.com/geocoding/v5/mapbox.places/" + req.body.newPost.title + ".json?types=poi&proximity=-123.13060,49.28562&limit=1&country=CA&access_token=" + process.env.MAPAPI)
+    .then(response => response.json())
+    .then(data => data.features[0].center)
+    .then(coordinates => {
+        let fullPost = req.body.newPost;
+        fullPost.author = req.user._id;
+        fullPost.image = req.file.path;
+        fullPost.location = coordinates;
+        return fullPost
+    })
+    .then(fullPost => Post.create(fullPost, function (err, post) { 
+        if(err){
+            res.redirect("/index/new")   
+        } else{
+            res.redirect("/index/1");
+        }
+    }));
 });
 
 // show
 router.get("/index/show/:id", function(req, res){
     Post.findById(req.params.id).populate("author").populate({path:"comments", populate: {path: "author", model: "User"}}).exec(function(err, post){
         if(!err){
-            res.render("show", {post: post, user: req.user});
+            res.render("show", {post: post, user: req.user, WEATHERAPI: process.env.WEATHERAPI, MAP: process.env.MAPAPI});
         } else{
             res.redirect("/index/1");
         }
