@@ -1,19 +1,21 @@
 <%- include("partials/header") %>
 
-<div class="container mt-5">
-    <h3 class="mb-3">Log In Now!</h3>
+<div class="container mt-5 pb-5 pt-5">
+    <div class="row">
+        <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 m-auto">
+            <h3 class="mb-3 text-dark pb-1">Log In Now!</h3>
 
-    <form method="POST" action="/login">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" name="username" class="form-control" id="username" placeholder="Enter your username" required>
+            <form method="POST" action="/login">
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-block">LOG IN</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="yourPassword">Password</label>
-            <input type="password" name="password" class="form-control" id="yourPassword" placeholder="Enter your password" required>
-        </div>
-        <button type="submit" class="btn btn-primary">LOG IN</button>
-    </form>
+    </div>
 </div>
 
 <%- include("partials/footer") %>

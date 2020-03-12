@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
-<div class="container mt-5">
-    <h3 class="mb-4">Edit your post!</h3>
+<div class="container mt-5 pb-5 pt-5">
+    <h3 class="mb-4 text-dark pb-1">Please edit your post and submit the form.</h3>
     <form method="POST" action="/index/show/<%= post._id %>?_method=PUT" enctype="multipart/form-data">
         <div class="row">
             <div class="input-group mb-3 col-md-8">
@@ -37,7 +37,7 @@
                 <textarea class="form-control" name="editPost[body]" rows="6" required><%= post.body %></textarea>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-secondary btn-lg btn-block mx-auto">Submit</button>
     </form>
 </div>
 

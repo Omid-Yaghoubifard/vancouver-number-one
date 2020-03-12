@@ -65,7 +65,7 @@ router.get("/index/:page", function(req, res, next) {
     const page = req.params.page || 1;
 
     Post
-        .find({})
+        .find(req.query || {})
         .skip((perPage * page) - perPage)
         .limit(perPage)
         .exec(function(err, posts) {

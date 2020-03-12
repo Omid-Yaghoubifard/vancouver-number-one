@@ -1,6 +1,6 @@
 <%- include("partials/header") %>
 
-<div class="container mt-5">
+<div class="container pt-5 mt-5 mb-3">
     <div class="row">
 
     <% posts.forEach(function(post){ %>
@@ -8,7 +8,7 @@
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="card-deck">
                 <div class="card">
-                <a href="/index/show/<%= post._id %>"><img class="card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
+                <a href="/index/show/<%= post._id %>"><img class="card-img card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
                 <div class="card-body">
                     <h5 class="card-title"><%= post.title %></h5>
                     <p class="card-text"><%= post.body.slice(0,100) %> ...</p>

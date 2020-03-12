@@ -1,11 +1,11 @@
 <%- include("partials/header") %>
 
-<div class="container mt-5">
-    <h3 class="mb-4">Add what you love in our Beautiful Vancouver!</h3>
+<div class="container mt-5 pb-5 pt-5">
+    <h3 class="mb-4 text-dark pb-1">Please fill in the following fields and submit the form.</h3>
     <form method="POST" action="/index" enctype="multipart/form-data">
         <div class="row">
              <div class="input-group mb-3 col-md-8">
-                <input type="text" class="form-control" name="newPost[title]" placeholder="Title" required>
+                <input type="text" class="form-control" name="newPost[title]" placeholder="Title (Please make sure you enter the official title.)" required>
             </div>
 
             <div class="input-group mb-3 col-md-4">
@@ -34,11 +34,11 @@
             
    
             <div class="input-group mb-3 col col-12">
-                <textarea class="form-control" name="newPost[body]" rows="6" required></textarea>
+                <textarea class="form-control" name="newPost[body]" rows="6" required placeholder="Please provide a precise and comprehensive description."></textarea>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-secondary btn-lg btn-block mx-auto">Submit</button>
     </form>
 </div>
-
+<!-- col-md-10 col-lg-8 col-xl-7 -->
 <%- include("partials/footer") %>
