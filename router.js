@@ -61,7 +61,7 @@ router.get("/index/new", isLoggedIn, function(req, res){
 
 // index
 router.get("/index/:page", function(req, res, next) {
-    const perPage = 9;
+    const perPage = 12;
     const page = req.params.page || 1;
 
     Post
@@ -109,6 +109,17 @@ router.get("/index/show/:id", function(req, res){
             res.render("show", {post: post, user: req.user, WEATHERAPI: process.env.WEATHERAPI, MAP: process.env.MAPAPI});
         } else{
             res.redirect("/index/1");
+        }
+    })
+});
+
+//navbar search
+router.post("/index/1", function(req, res){
+    Post.findOne({title: new RegExp(req.body.search, "i")}).exec(function(err, post){
+        if(!post || err){
+            res.redirect("/index/1");
+        } else{
+            res.redirect("/index/show/"+post._id);
         }
     })
 });

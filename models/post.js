@@ -20,7 +20,10 @@ const Post = new mongoose.Schema({
     }],
     date: { type: Date, default: Date.now },
     url: String,
-    location: Array
+    location: Array,
+    fields: {type: [String], text: true}
 });
+
+// Pst.index({fields: "text"});
 
 module.exports = mongoose.model("Post", Post);

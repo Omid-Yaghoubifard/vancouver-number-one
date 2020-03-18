@@ -50,55 +50,79 @@ body {
     padding-bottom: 0;
 }
 
-@media (max-width: 576px){
-    .card-img.card-img-top{
-    width: 100%;
-    height: 65vw;
-    object-fit: cover;
-    } #front-top {
-    left: 30%;
-    top: 17%;
-    background: rgba(171, 205, 239, 0.5);
-    width: 287px;
-    height: 125px;
-    } #front-top h3 {
-    font-size: 1.25rem;
-    } #front-top h1 {
-    font-size: 2.2rem;
+@media (min-width: 450px) and (max-width: 575px){
+    .very-small{
+        width: 400px;
+        margin-left: auto;
+        margin-right: auto;
 }}
 
-@media (min-width: 577px) and (max-width: 767px){
+@media (max-width: 575px){
     .card-img.card-img-top{
-    width: 100%;
-    height: 27vw;
-    object-fit: cover;
+        width: 100%;
+        height: 65vw;
+        object-fit: cover;
     } #front-top {
-    left: 27%;
-    top:12%;
-    background: rgba(171, 205, 239, 0.4)
-} #front-top h3 {
-    font-size: 1.4rem;
+        left: 30%;
+        top: 17%;
+        background: rgba(171, 205, 239, 0.5);
+        width: 287px;
+        height: 125px;
+    } #front-top h3 {
+        font-size: 1.25rem;
     } #front-top h1 {
-    font-size: 2.5rem;
+        font-size: 2.2rem;
+    }}
+
+@media (max-width: 258px){
+    #front-top {
+        display: none;
+}}
+
+@media (min-width: 259px) and (max-width: 480px){
+    #front-top {
+        left: 57%;
+        top: 17%;
+        background: rgba(171, 205, 239, 0.5);
+        width: 250px;
+    } #front-top h3 {
+        font-size: 1rem;
+    } #front-top h1 {
+        font-size: 1.8rem;
+}}
+
+@media (min-width: 576px) and (max-width: 767px){
+    .card-img.card-img-top{
+        width: 100%;
+        height: 27vw;
+        object-fit: cover;
+    } #front-top {
+        left: 27%;
+        top:12%;
+        background: rgba(171, 205, 239, 0.4)
+} #front-top h3 {
+        font-size: 1.4rem;
+    } #front-top h1 {
+        font-size: 2.5rem;
 }}
 
 @media (min-width: 768px) and (max-width: 991px){ .card-img.card-img-top{
-    width: 100%;
-    height: 25vw;
-    object-fit: cover;
+        width: 100%;
+        height: 25vw;
+        object-fit: cover;
     } #front-top {
-    left: 20%;
-    top:10%;
-    background: rgba(171, 205, 239, 0.3)
+        left: 20%;
+        top:10%;
+        background: rgba(171, 205, 239, 0.3)
 }}
 
 @media (min-width: 992px){
     .card-img.card-img-top{
-    width: 100%;
-    height: 15vw;
-    object-fit: cover;
+        width: 100%;
+        height: 15vw;
+        object-fit: cover;
     } #front-top {
-    top:8%;
-    left:17%;
-    background: rgba(171, 205, 239, 0.3)
+        top:8%;
+        left:17%;
+        background: rgba(171, 205, 239, 0.3)
 }}
