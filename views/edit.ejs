@@ -37,7 +37,8 @@
                 <textarea class="form-control" name="editPost[body]" rows="6" required><%= post.body %></textarea>
             </div>
         </div>
-        <button type="submit" class="btn btn-secondary btn-lg btn-block mx-auto">Submit</button>
+        <button type="submit" class="btn btn-dark btn-block mx-auto">Submit</button>
+        <a href="/index/show/<%= post._id %>" class="btn btn-secondary btn-block mx-auto">Cancel</a>
     </form>
 </div>
 

@@ -179,7 +179,7 @@ router.delete("/index/show/:id", isLoggedIn, loggedInUser, function(req,res){
 
 //signup
 router.get("/signup", isNotLoggedIn, function(req,res){
-    res.render("signup", {user: req.user});
+    res.render("signup");
 });
 
 router.post("/signup", isNotLoggedIn, function(req, res) {
@@ -213,6 +213,22 @@ router.post("/login", isNotLoggedIn, passport.authenticate("local", {
     successRedirect:"/index/1",
     failureRedirect: "/login"
 }));
+
+//profile
+router.get("/profile", isLoggedIn, function(req,res){
+    Post.find({author: req.user._id}).populate("author").exec(function (err, posts){
+        if(!err && req.user){
+            res.render("profile", {user:req.user, posts:posts});
+        }
+        else{
+            res.render("index/1")
+        }
+    })
+});        
+
+router.get("/profile/edit", isLoggedIn, function(req,res){
+    res.render("profileEdit", {user: req.user});
+});
 
 // logout
 router.get("/logout", isLoggedIn, function(req,res){

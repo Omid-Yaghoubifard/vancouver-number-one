@@ -1,0 +1,38 @@
+<%- include("partials/header") %>
+
+<div class="container mt-5 pt-5">
+    <div class="mb-4 profileTitle" id="profileBack">
+        <h5>Username: <a href="/profile"> <%= user.username %> </a> </h5>
+        <h5>Email: <a href="/profile"> <%= user.email %> </a> </h5>
+        <h5> Password: <span class="asterisk">**********</span></h5>
+        <a class="btn btn-secondary" href="profile/edit">Edit Your Profile</a>
+    </div>
+    <% if(posts.length > 0){ %>
+        <div class="mt-5 mb-4 profileTitle">
+            <h3>Your posts at a glance:</h3>
+        </div>
+    <% } %>
+    <div class="row">
+        
+        <% posts.forEach(function(post){ %>
+
+            <div class="col-sm-6 col-lg-4 mb-5 very-small">
+                <div class="card-deck">
+                    <div class="card">
+                    <a href="/index/show/<%= post._id %>"><img class="card-img card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
+                    <div class="card-body">
+                        <h5 class="card-title"><%= post.title %></h5>
+                        <p class="card-text"><%= post.body.slice(0,100) %> ...</p>
+                        <a href="/index/show/<%= post._id %>" class= "btn btn-outline-success">Read more</a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+        <% }); %>
+
+    </div>
+</div>
+
+
+<%- include("partials/footer") %>

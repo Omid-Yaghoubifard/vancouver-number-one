@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
 app.use("/index/public/images", express.static(__dirname + "/public/images"));
 app.use("/index/show/public/images", express.static(__dirname + "/public/images"));
+app.use("/public/images", express.static(__dirname + "/public/images"));
 app.use(methodOverride("_method"));
 
 app.use(session({

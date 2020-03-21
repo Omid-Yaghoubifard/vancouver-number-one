@@ -50,9 +50,22 @@ body {
     padding-bottom: 0;
 }
 
+.asterisk {
+    vertical-align: sub;
+}
+
+#profileBack {
+    background-color: #ecf0f1;
+    padding: 14px;
+}
+
 @media (min-width: 450px) and (max-width: 575px){
     .very-small{
         width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    } .profileTitle {
+        width: 370px;
         margin-left: auto;
         margin-right: auto;
 }}

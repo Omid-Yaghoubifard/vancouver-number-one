@@ -34,7 +34,10 @@
                 </li>
               <% }else{ %>
                 <li class="nav-item active">
-                  <a class="nav-link" href="/profile"> Welcome <%= user.username %><span class="sr-only">(current)</span></a>
+                  <a class="nav-link" href="/profile">Logged in as <%= user.username %><span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/index/new">Create a New Post</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="/logout">Log Out</a>
