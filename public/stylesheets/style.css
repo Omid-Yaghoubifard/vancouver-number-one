@@ -22,6 +22,11 @@ body {
     margin-bottom:25px;
 }
 
+.fadeOutItems {
+    font-size: 18px;
+}
+
+
 #front-top {
     position: absolute;
     width: 385px;
@@ -54,9 +59,16 @@ body {
     vertical-align: sub;
 }
 
-#profileBack {
+#profileBack, #profileBack2 {
     background-color: #ecf0f1;
     padding: 14px;
+}
+
+#map {
+    box-shadow: 10px -2px 20px 2px rgba(0,0,0,.3);
+    border-radius: 6px;
+    width: 224px;
+    height: 237px;
 }
 
 @media (min-width: 450px) and (max-width: 575px){

@@ -1,11 +1,15 @@
 <%- include("partials/header") %>
 
 <div class="container mt-5 pt-5">
+    <% if ( message1.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message1 %></strong></p>
+    <% } %>
+
     <div class="mb-4 profileTitle" id="profileBack">
         <h5>Username: <a href="/profile"> <%= user.username %> </a> </h5>
         <h5>Email: <a href="/profile"> <%= user.email %> </a> </h5>
         <h5> Password: <span class="asterisk">**********</span></h5>
-        <a class="btn btn-secondary" href="profile/edit">Edit Your Profile</a>
+        <a class="btn btn-secondary" href="profile/edit">Change Your Password</a>
     </div>
     <% if(posts.length > 0){ %>
         <div class="mt-5 mb-4 profileTitle">

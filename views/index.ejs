@@ -1,6 +1,28 @@
 <%- include("partials/header") %>
 
 <div class="container pt-5 mt-5 mb-3">
+    <% if ( message1.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message1 %></strong></p>
+    <% } %>
+    <% if ( message2.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message2 %></strong></p>
+    <% } %>
+    <% if ( message3.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message3 %></strong></p>
+    <% } %>
+    <% if ( message4.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message4 %></strong></p>
+    <% } %>
+    <% if ( message5.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message5 %></strong></p>
+    <% } %>
+    <% if ( message6.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message6 %></strong></p>
+    <% } %>
+    <% if ( message7.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message7 %></strong></p>
+    <% } %>
+
     <div class="row">
 
     <% posts.forEach(function(post){ %>

@@ -1,6 +1,13 @@
 <%- include("partials/header") %>
 
 <div class="container pt-5 mt-5">
+    <% if ( message1.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message1 %></strong></p>
+    <% } %>
+    <% if ( message2.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4"><strong><%= message2 %></strong></p>
+    <% } %>
+
     <div class="row">
         <div class="col-md-8 col-lg-9">
             <div class="card-deck">
@@ -30,9 +37,9 @@
     <div class="col-md-4 col-lg-3 d-none d-md-block">
         <div class="row">
             <div id="openweathermap-widget-12" class="ml-2"></div>
-                <script>window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  window.myWidgetParam.push({id: 12,cityid: "6173331",appid: "<%= WEATHERAPI %>",units: "metric",containerid: "openweathermap-widget-12",  });  (function() {var script = document.createElement('script');script.async = true;script.charset = "utf-8";script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(script, s);  })();</script>
+                <script>window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  window.myWidgetParam.push({id: 12,cityid: "6173331",appid: "<%= WEATHERAPI %>",units: "metric",containerid: "openweathermap-widget-12",  });  (function() {var script = document.createElement("script");script.async = true;script.charset = "utf-8";script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(script, s);  })();</script>
             </div>
-            <div id="map" style="width: 224px; height: 237px;" class="mt-5"></div>
+            <div id="map" class="mt-5"></div>
                 <script>
                 mapboxgl.accessToken = "<%= MAP %>";
                 const map = new mapboxgl.Map({

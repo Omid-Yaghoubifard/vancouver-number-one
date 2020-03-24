@@ -11,7 +11,11 @@ const express               = require("express"),
       methodOverride        = require("method-override"),
       fetch                 = require("node-fetch"),
       Post                  = require("./models/post.js"),
-      Comment               = require("./models/comment.js");
+      Comment               = require("./models/comment.js"),
+      flash                 = require("connect-flash"),
+      cookieParser          = require("cookie-parser");
+      // expressValidator
+
 
 const app = express();
 
@@ -22,6 +26,7 @@ app.use("/index/public/images", express.static(__dirname + "/public/images"));
 app.use("/index/show/public/images", express.static(__dirname + "/public/images"));
 app.use("/public/images", express.static(__dirname + "/public/images"));
 app.use(methodOverride("_method"));
+app.use(cookieParser(process.env.COOKIEPARSER));
 
 app.use(session({
   secret: process.env.SECRET,
@@ -30,6 +35,7 @@ app.use(session({
   cookie: { secure: "auto" }
 }))
 
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 

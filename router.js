@@ -7,7 +7,9 @@ const express        = require("express"),
       User           = require("./models/user"),
       Post           = require("./models/post"),
       fetch          = require("node-fetch"),
-      Comment        = require("./models/comment");
+      Comment        = require("./models/comment"),
+      flash          = require("connect-flash"),
+      cookieParser   = require("cookie-parser");
 
 // check isLoggedIn
 function isLoggedIn(req, res, next){
@@ -51,12 +53,15 @@ var upload = multer({storage: Storage});
 
 // homepage
 router.get("/", function(req, res) {
-    res.render("home", {user: req.user});   
+    res.render("home", {
+        user: req.user,
+    });
 });
 
 // new
 router.get("/index/new", isLoggedIn, function(req, res){
-    res.render("new", {user: req.user});
+    res.render("new", {user: req.user, message1: req.flash("postFailed")
+    });
 });
 
 // index
@@ -75,7 +80,14 @@ router.get("/index/:page", function(req, res, next) {
                     posts: posts,
                     current: page,
                     pages: Math.ceil(count / perPage),
-                    user: req.user
+                    user: req.user,
+                    message1: req.flash("postCreated"),
+                    message2: req.flash("noMatch"),
+                    message3: req.flash("errorMessage"),
+                    message4: req.flash("deleted"),
+                    message5: req.flash("userSignedUp"),
+                    message6: req.flash("profileFailed"),
+                    message7: req.flash("loggedOut"),
                 })
             })
         })
@@ -95,8 +107,10 @@ router.post("/index", isLoggedIn, upload.single("image"), function(req, res){
     })
     .then(fullPost => Post.create(fullPost, function (err, post) { 
         if(err){
+            req.flash("postFailed", "Sorry. There was an error while creating the post!");
             res.redirect("/index/new")   
         } else{
+            req.flash("postCreated", "Well done! Your post was succesfully created.");
             res.redirect("/index/1");
         }
     }));
@@ -106,8 +120,16 @@ router.post("/index", isLoggedIn, upload.single("image"), function(req, res){
 router.get("/index/show/:id", function(req, res){
     Post.findById(req.params.id).populate("author").populate({path:"comments", populate: {path: "author", model: "User"}}).exec(function(err, post){
         if(!err){
-            res.render("show", {post: post, user: req.user, WEATHERAPI: process.env.WEATHERAPI, MAP: process.env.MAPAPI});
+            res.render("show", {
+                post: post, 
+                user: req.user, 
+                WEATHERAPI: process.env.WEATHERAPI, 
+                MAP: process.env.MAPAPI,  
+                message1: req.flash("updated"),
+                message2: req.flash("deleteError")
+            });
         } else{
+            req.flash("errorMessage", "Sorry. There was an error. Please try again");
             res.redirect("/index/1");
         }
     })
@@ -117,6 +139,7 @@ router.get("/index/show/:id", function(req, res){
 router.post("/index/1", function(req, res){
     Post.findOne({title: new RegExp(req.body.search, "i")}).exec(function(err, post){
         if(!post || err){
+            req.flash("noMatch", "Sorry. There was no result that matched your search query.");
             res.redirect("/index/1");
         } else{
             res.redirect("/index/show/"+post._id);
@@ -137,9 +160,11 @@ router.put("/index/show/:id", isLoggedIn, loggedInUser, upload.single("image"), 
     Post.findByIdAndUpdate(req.params.id, editedPost, function(err, modified){
         if(req.file != undefined){
             Post.findByIdAndUpdate(req.params.id, {image: req.file.path}, function(err, modifiedImage){
+                req.flash("updated", "Well done! Your post was successfully updated.");
                 res.redirect("/index/show/"+req.params.id)
             })   
         }else{
+            req.flash("updated", "Well done! Your post was successfully updated.");
             res.redirect("/index/show/"+req.params.id);
     }
     })
@@ -170,8 +195,10 @@ router.get("/index/show/:id/delete", isLoggedIn, loggedInUser, function(req,res)
 router.delete("/index/show/:id", isLoggedIn, loggedInUser, function(req,res){
     Post.findByIdAndRemove(req.params.id, function(err, post){
         if(err){
+            req.flash("deleteError", "Sorry. There was an error deleting the post");
             res.redirect("/index/show/"+req.params.id);
         } else{
+            req.flash("deleted", "Your post was successfully deleted.");
             res.redirect("/index/1");
         }
     });
@@ -179,17 +206,22 @@ router.delete("/index/show/:id", isLoggedIn, loggedInUser, function(req,res){
 
 //signup
 router.get("/signup", isNotLoggedIn, function(req,res){
-    res.render("signup");
+    res.render("signup", {
+        user: req.user,
+        message1: req.flash("passwordMatch"),
+        message2: req.flash("signUpError")
+    });
 });
 
 router.post("/signup", isNotLoggedIn, function(req, res) {
     if(req.body.password != req.body.password2) {
+        req.flash("passwordMatch", "Please make sure you enter the same password twice.");
         res.redirect("/signup");
     } else {
     User.register(new User({ username : req.body.username }), req.body.password, function(err, newUser) {
         if (err) {
-            console.log(err);
-            res.render("signup", {info: "Sorry. That username already exists. Try again."});
+            req.flash("signUpError", "Sorry. That username already exists. Please try another username.");
+            res.redirect("/signup");
         } else {
         User.findOne({ username:req.body.username }, function (err, foundUser) {
             if (err) {
@@ -199,41 +231,80 @@ router.post("/signup", isNotLoggedIn, function(req, res) {
                 foundUser.save();
         })
         passport.authenticate("local")(req, res, function () {
-          res.redirect("/index/1");
+            req.flash("userSignedUp", "Congratulations! Your account was created successfully.");
+            res.redirect("/index/1");
         });
     }});
 }});
 
 //login
 router.get("/login", isNotLoggedIn, function(req,res){
-    res.render("login", {user: req.user});
+    res.render("login", {
+        user: req.user,
+        message1: req.flash("failedLogIn")
+    });
 });
 
-router.post("/login", isNotLoggedIn, passport.authenticate("local", { 
-    successRedirect:"/index/1",
-    failureRedirect: "/login"
-}));
+router.post("/login", isNotLoggedIn,
+  passport.authenticate("local", {failureRedirect: "/loginfailed"}),
+  function(req, res) {
+      res.redirect("/index/1");
+});
+
+router.get("/loginfailed", isNotLoggedIn, function(req, res){
+    req.flash("failedLogIn", "Login failed! The username or password is incorrect.");
+    res.redirect("/login");
+});
 
 //profile
 router.get("/profile", isLoggedIn, function(req,res){
     Post.find({author: req.user._id}).populate("author").exec(function (err, posts){
         if(!err && req.user){
-            res.render("profile", {user:req.user, posts:posts});
+            res.render("profile", {
+                user:req.user, 
+                posts:posts,
+                message1: req.flash("passwordChange") 
+            });
         }
         else{
-            res.render("index/1")
+            req.flash("profileFailed", "There was an error loading the profile page. Please try again.");
+            res.redirect("index/1")
         }
     })
 });        
 
 router.get("/profile/edit", isLoggedIn, function(req,res){
-    res.render("profileEdit", {user: req.user});
+    res.render("profileEdit", {
+        user: req.user,
+        message1: req.flash("passwordMatch"),
+        message2: req.flash("passwordChangeError")
+    });
 });
+
+router.post("/profile", isLoggedIn, function(req, res) {
+    if(req.body.password != req.body.password2) {
+        req.flash("passwordMatch", "Please make sure you enter the same password twice.");
+        res.redirect("/profile/edit");
+    } else {
+        User.findOne({username: req.user.username}).then(function(user){
+            if (user){
+                user.setPassword(req.body.password, function(err){
+                    user.save();
+                    req.flash("passwordChange", "You have successfully changed your password.");
+                    res.redirect("/profile");
+                });
+            } else {
+                req.flash("passwordChangeError", "There was an error. Please try again");
+                res.redirect("/profile/edit");
+            }
+        })
+}});
 
 // logout
 router.get("/logout", isLoggedIn, function(req,res){
     req.logout();
-    res.redirect("/");
+    req.flash("loggedOut", "You have succesfully logged out!");
+    res.redirect("/index/1");
 });
 
 module.exports = router
