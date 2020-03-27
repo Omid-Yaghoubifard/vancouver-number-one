@@ -2,16 +2,15 @@
 
 <div class="container pt-5 pb-5 mt-5">
 
-  <% if ( message1.length > 0 ) { %>
-    <p class="fadeOutItems text-secondary mb-4"><strong><%= message1 %></strong></p>
-  <% } %>
-  <% if ( message2.length > 0 ) { %>
-    <p class="fadeOutItems text-secondary mb-4"><strong><%= message2 %></strong></p>
-  <% } %>
+  <% messages.forEach(function(message){ %>
+    <% if ( message.length > 0 ) { %>
+        <p class="fadeOutItems text-secondary mb-4 open-sans-font"><%= message %></p>
+    <% } %>
+  <% }) %>
 
   <div class="row">
     <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 m-auto">
-      <h3 class="mb-3 text-dark pb-1">Sign Up Now!</h3>
+      <h3 class="mb-3 text-dark pb-1 open-sans-font">Sign Up Now!</h3>
 
       <form method="POST" action="/signup">
           <div class="form-group">

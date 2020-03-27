@@ -1,27 +1,12 @@
 <%- include("partials/header") %>
 
 <div class="container pt-5 mt-5 mb-3">
-    <% if ( message1.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message1 %></strong></p>
-    <% } %>
-    <% if ( message2.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message2 %></strong></p>
-    <% } %>
-    <% if ( message3.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message3 %></strong></p>
-    <% } %>
-    <% if ( message4.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message4 %></strong></p>
-    <% } %>
-    <% if ( message5.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message5 %></strong></p>
-    <% } %>
-    <% if ( message6.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message6 %></strong></p>
-    <% } %>
-    <% if ( message7.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message7 %></strong></p>
-    <% } %>
+
+    <% messages.forEach(function(message){ %>
+        <% if ( message.length > 0 ) { %>
+            <p class="fadeOutItems text-secondary mb-4 open-sans-font"><%= message %></p>
+        <% } %>
+    <% }) %>
 
     <div class="row">
 
@@ -43,36 +28,38 @@
     <% }); %>
     
     </div>
-
-    <% if (pages > 1) { %>
-        <ul class="pagination text-center">
-            <% if (current == 1) { %>
-                <li class="disabled"><a>First</a></li>
-            <% } else { %>
-                <li><a href="/index/1">First </a></li>
-            <% } %>
-            <% let i = (Number(current) > 5 ? Number(current) - 4 : 1) %>
-            <% if (i !== 1) { %>
-                <li class="disabled"><a>...</a></li>
-            <% } %>
-            <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %>
-                <% if (i == current) { %>
-                    <li class="active"><a><%= i %></a></li>
+    <div>
+        <% if (pages > 1) { %>
+            <ul class="pagination mb-5">
+                <div id="centering">
+                <% if (current == 1) { %>
+                    <li class="disabled"><a> « </a></li>
                 <% } else { %>
-                    <li><a href="/index/<%= i %>"><%= i %></a></li>
+                    <li><a href="/index/1<%= search %>"> « </a></li>
                 <% } %>
-                <% if (i == Number(current) + 4 && i < pages) { %>
+                <% let i = (Number(current) > 5 ? Number(current) - 4 : 1) %>
+                <% if (i !== 1) { %>
                     <li class="disabled"><a>...</a></li>
                 <% } %>
-            <% } %>
-            <% if (current == pages) { %>
-                <li class="disabled"><a> Last</a></li>
-            <% } else { %>
-                <li><a href="/index/<%= pages %>"> Last</a></li>
-            <% } %>
-        </ul>
-    <% } %>
-
+                <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %>
+                    <% if (i == current) { %>
+                        <li class="active"><a><%= i %></a></li>
+                    <% } else { %>
+                        <li><a href="/index/<%= i %><%= search %>"><%= i %></a></li>
+                    <% } %>
+                    <% if (i == Number(current) + 4 && i < pages) { %>
+                        <li class="disabled"><a>...</a></li>
+                    <% } %>
+                <% } %>
+                <% if (current == pages) { %>
+                    <li class="disabled"><a> » </a></li>
+                <% } else { %>
+                    <li><a href="/index/<%= pages %><%= search %>"> » </a></li>
+                <% } %>
+                </div>
+            </ul>
+        <% } %>
+    </div>
 </div>
 
 <%- include("partials/footer") %>

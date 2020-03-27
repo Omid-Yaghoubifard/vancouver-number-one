@@ -5,6 +5,11 @@ html {
 body {
     background-color: #81ecec;
     height: 100%;
+    font-family: "Roboto", sans-serif;
+}
+
+.open-sans-font {
+    font-family: "Open Sans", sans-serif;
 }
 
 .wrapper {
@@ -25,7 +30,6 @@ body {
 .fadeOutItems {
     font-size: 18px;
 }
-
 
 #front-top {
     position: absolute;
@@ -69,6 +73,30 @@ body {
     border-radius: 6px;
     width: 224px;
     height: 237px;
+}
+
+#centering {
+    margin: auto;
+    display: inline-flex;
+}
+
+.pagination li { 
+    font-weight:bold; 
+    font-size:18px; 
+    color: black; 
+    float: left; 
+    padding: 6px 15px; 
+    text-decoration: none; 
+}
+
+.pagination li.active { 
+    border-radius: 5px;     
+    background-color: #7f8c8d;
+}
+
+.pagination li:hover:not(.active) { 
+    border-radius: 5px;
+    background-color: #bdc3c7;
 }
 
 @media (min-width: 450px) and (max-width: 575px){
@@ -147,7 +175,7 @@ body {
         height: 15vw;
         object-fit: cover;
     } #front-top {
-        top:8%;
+        top:10%;
         left:17%;
         background: rgba(171, 205, 239, 0.3)
 }}

@@ -1,12 +1,11 @@
 <%- include("partials/header") %>
 
 <div class="container pt-5 mt-5">
-    <% if ( message1.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message1 %></strong></p>
-    <% } %>
-    <% if ( message2.length > 0 ) { %>
-        <p class="fadeOutItems text-secondary mb-4"><strong><%= message2 %></strong></p>
-    <% } %>
+    <% messages.forEach(function(message){ %>
+        <% if ( message.length > 0 ) { %>
+            <p class="fadeOutItems text-secondary mb-4 open-sans-font"><%= message %></p>
+        <% } %>
+    <% }) %>
 
     <div class="row">
         <div class="col-md-8 col-lg-9">
@@ -25,7 +24,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <small class="text-muted"> Created by <strong class="text-success">
+                    <small class="text-muted open-sans-font"> Created by <strong class="text-success">
                         <% if(user && (user.username === post.author[0].username)){ %> <span>you</span>
                         <% } else { %> <%= post.author[0].username %> <% } %>
                         </strong> on <%= post.date.toLocaleDateString() %> 

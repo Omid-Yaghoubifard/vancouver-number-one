@@ -1,12 +1,16 @@
 <%- include("partials/header") %>
 
 <div class="container mt-5 pb-5 pt-5">
-    <h3 class="mb-4 text-dark pb-1">Are you sure you want to delete your post?</h3>
     <div class="row">
-        <form method="POST" action="/index/show/<%= post._id %>?_method=DELETE">
-            <button type="submit" class="btn btn-danger btn-lg ml-3">Yes, delete the post!</button>
-        </form>
-        <a class="btn btn-primary btn-lg ml-3" href="/index/show/<%= post._id %>">No, please go back!</a>
+        <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 m-auto open-sans-font">
+            <h4 class="mb-4 text-dark open-sans-font">Would you like to delete your post?</h4>
+            <div>
+                <form method="POST" action="/index/show/<%= post._id %>?_method=DELETE">
+                    <button type="submit" class="btn btn-dark btn-block mb-2">Delete</button>
+                </form>
+                <a class="btn btn-secondary btn-block" href="/index/show/<%= post._id %>">Cancel</a>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -68,26 +68,25 @@ router.get("/index/new", isLoggedIn, function(req, res){
 router.get("/index/:page", function(req, res, next) {
     const perPage = 12;
     const page = req.params.page || 1;
-
+    if ("category" in req.query){
+        var search = "?category=" + req.query.category;
+    } else{
+        var search = "";
+    };
     Post
         .find(req.query || {})
         .skip((perPage * page) - perPage)
         .limit(perPage)
         .exec(function(err, posts) {
-            Post.countDocuments().exec(function(err, count) {
+            Post.countDocuments(req.query || {}).exec(function(err, count) {
                 if (err) return next(err)
                 res.render("index", {
                     posts: posts,
                     current: page,
                     pages: Math.ceil(count / perPage),
                     user: req.user,
-                    message1: req.flash("postCreated"),
-                    message2: req.flash("noMatch"),
-                    message3: req.flash("errorMessage"),
-                    message4: req.flash("deleted"),
-                    message5: req.flash("userSignedUp"),
-                    message6: req.flash("profileFailed"),
-                    message7: req.flash("loggedOut"),
+                    search: search,
+                    messages: [req.flash("postCreated"), req.flash("noMatch"), req.flash("errorMessage"), req.flash("deleted"), req.flash("userSignedUp"), req.flash("profileFailed"), req.flash("loggedOut")]
                 })
             })
         })
@@ -107,7 +106,7 @@ router.post("/index", isLoggedIn, upload.single("image"), function(req, res){
     })
     .then(fullPost => Post.create(fullPost, function (err, post) { 
         if(err){
-            req.flash("postFailed", "Sorry. There was an error while creating the post!");
+            req.flash("postFailed", "Sorry. That title already exists.");
             res.redirect("/index/new")   
         } else{
             req.flash("postCreated", "Well done! Your post was succesfully created.");
@@ -124,9 +123,8 @@ router.get("/index/show/:id", function(req, res){
                 post: post, 
                 user: req.user, 
                 WEATHERAPI: process.env.WEATHERAPI, 
-                MAP: process.env.MAPAPI,  
-                message1: req.flash("updated"),
-                message2: req.flash("deleteError")
+                MAP: process.env.MAPAPI,
+                messages: [req.flash("updated"), req.flash("deleteError")]  
             });
         } else{
             req.flash("errorMessage", "Sorry. There was an error. Please try again");
@@ -208,8 +206,7 @@ router.delete("/index/show/:id", isLoggedIn, loggedInUser, function(req,res){
 router.get("/signup", isNotLoggedIn, function(req,res){
     res.render("signup", {
         user: req.user,
-        message1: req.flash("passwordMatch"),
-        message2: req.flash("signUpError")
+        messages: [req.flash("passwordMatch"), req.flash("signUpError")]
     });
 });
 
@@ -276,8 +273,7 @@ router.get("/profile", isLoggedIn, function(req,res){
 router.get("/profile/edit", isLoggedIn, function(req,res){
     res.render("profileEdit", {
         user: req.user,
-        message1: req.flash("passwordMatch"),
-        message2: req.flash("passwordChangeError")
+        messages: [req.flash("passwordMatch"), req.flash("passwordChangeError")]
     });
 });
 
