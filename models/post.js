@@ -5,8 +5,8 @@ const mongoose = require("mongoose"),
 const Post = new mongoose.Schema({
     title: String,
     author: [{
-           type: mongoose.Schema.Types.ObjectId,
-           ref: "User"
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     }],
     body: String,
     category: {

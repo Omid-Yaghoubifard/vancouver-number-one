@@ -25,7 +25,9 @@
     "passport-local-mongoose": "^5.0.1"
   },
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "alert-node": "^2.1.4",
+    "celebrate": "^12.0.1",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",

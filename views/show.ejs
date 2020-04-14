@@ -2,7 +2,7 @@
 
 <div class="container pt-5 mt-5">
     <% messages.forEach(function(message){ %>
-        <% if ( message.length > 0 ) { %>
+        <% if (typeof message == "object" && message.length> 0) { %>
             <p class="fadeOutItems text-secondary mb-4 open-sans-font"><%= message %></p>
         <% } %>
     <% }) %>
@@ -57,7 +57,7 @@
                     <div class="panel-body">
                         <% if(user){ %>
                             <form action="/index/show/<%= post._id %>" method="POST">
-                                <textarea class="form-control" placeholder=" Write a comment..." rows="4" name="newComment[text]" required></textarea>
+                                <textarea class="form-control" placeholder=" Write a comment..." rows="4" name="text" maxlength="1000" required></textarea>
                                 <br>
                                 <button type="submit" class="btn btn-secondary float-right">Post Comment</button>
                             </form>

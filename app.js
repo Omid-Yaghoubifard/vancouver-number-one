@@ -1,25 +1,25 @@
-                              require("dotenv").config();
-const express               = require("express"),
-      bodyParser            = require("body-parser"),
-      multer                = require("multer"),
-      mongoose              = require("mongoose"),
-      ejs                   = require("ejs"),
-      session               = require("express-session"),
-      router                = require("./router"),
-      passport              = require("passport"),
-      passportLocalMongoose = require("passport-local-mongoose"),
-      methodOverride        = require("method-override"),
-      fetch                 = require("node-fetch"),
-      Post                  = require("./models/post.js"),
-      Comment               = require("./models/comment.js"),
-      flash                 = require("connect-flash"),
-      cookieParser          = require("cookie-parser");
-      // expressValidator
+                                             require("dotenv").config();
+const express                              = require("express"),
+      bodyParser                           = require("body-parser"),
+      multer                               = require("multer"),
+      mongoose                             = require("mongoose"),
+      ejs                                  = require("ejs"),
+      session                              = require("express-session"),
+      router                               = require("./router"),
+      passport                             = require("passport"),
+      passportLocalMongoose                = require("passport-local-mongoose"),
+      methodOverride                       = require("method-override"),
+      fetch                                = require("node-fetch"),
+      Post                                 = require("./models/post.js"),
+      Comment                              = require("./models/comment.js"),
+      flash                                = require("connect-flash"),
+      cookieParser                         = require("cookie-parser"),
+      app                                  = express(),
+      { celebrate, Joi, errors, Segments } = require("celebrate");
 
-
-const app = express();
 
 app.set ("view engine", "ejs");
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
 app.use("/index/public/images", express.static(__dirname + "/public/images"));
@@ -43,6 +43,12 @@ mongoose.connect("mongodb://localhost:27017/Vancouver_number_one", {useNewUrlPar
 mongoose.set("useFindAndModify", false);
 
 app.use(router);
+app.use(errors());
+app.use(function (err, req, res, next) {
+  if (err instanceof multer.MulterError) {
+    res.status(500).send({ Error: "Expected file size: 200 KB to 750 KB | Expected file formats: jpeg, jpg, png, gif, tif, tiff" })
+  } else next();
+});
 
 const User = require("./models/user");
 

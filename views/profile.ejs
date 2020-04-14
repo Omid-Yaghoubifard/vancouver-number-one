@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
 <div class="container mt-5 pt-5">
-    <% if ( message1.length > 0 ) { %>
+    <% if (typeof message1 == "object" && message1.length> 0) { %>
         <p class="fadeOutItems text-secondary mb-4 open-sans-font"><%= message1 %></p>
     <% } %>
 

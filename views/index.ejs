@@ -3,7 +3,7 @@
 <div class="container pt-5 mt-5 mb-3">
 
     <% messages.forEach(function(message){ %>
-        <% if ( message.length > 0 ) { %>
+        <% if (typeof message == "object" && message.length> 0) { %>
             <p class="fadeOutItems text-secondary mb-4 open-sans-font"><%= message %></p>
         <% } %>
     <% }) %>
