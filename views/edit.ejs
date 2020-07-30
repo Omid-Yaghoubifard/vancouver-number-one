@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
 <div class="container mt-5 pb-5 pt-5">
-    <h3 class="mb-4 text-dark pb-1 open-sans-font">Please edit your post and submit the form.</h3>
+    <h4 class="mb-4 text-dark pb-1 open-sans-font">Please edit your post and submit the form.</h4>
     <form method="POST" action="/index/show/<%= post._id %>?_method=PUT" enctype="multipart/form-data">
         <div class="row">
             <div class="input-group mb-3 col-md-8">
@@ -10,19 +10,19 @@
 
             <div class="input-group mb-3 col-md-4">
                 <select class="custom-select" id="inputGroupSelect02" name="category" required> 
-                <option <%= post.category === "" ? "selected": "" %>>Category</option>
-                <option value="Natural" <%= post.category === "Natural" ? "selected": "" %>>Natural</option>
-                <option value="Cultural" <%= post.category === "Cultural" ? "selected": "" %>>Cultural (Heritage)</option>
-                <option value="Events" <%= post.category === "Events" ? "selected": "" %>>Events</option>
-                <option value="Man-Made" <%= post.category === "Man-Made" ? "selected": "" %>>Man-Made</option>
+                    <option <%= post.category === "" ? "selected": "" %>>Category</option>
+                    <option value="Natural" <%= post.category === "Natural" ? "selected": "" %>>Natural</option>
+                    <option value="Cultural" <%= post.category === "Cultural" ? "selected": "" %>>Cultural (Heritage)</option>
+                    <option value="Events" <%= post.category === "Events" ? "selected": "" %>>Events</option>
+                    <option value="Man-Made" <%= post.category === "Man-Made" ? "selected": "" %>>Man-Made</option>
                 </select>
                 <div class="input-group-append">
-                <label class="input-group-text" for="inputGroupSelect02">Options</label>
+                    <label class="input-group-text" for="inputGroupSelect02">Options</label>
                 </div>
             </div>
 
             <div class="input-group mb-3 col-md-8">
-                <input type="url" class="form-control" name="url" value="<%= post.url %>">
+                <input type="url" class="form-control" name="url" value="<%= post.url %>" required>
             </div>
 
             <div class="input-group mb-3 col-md-4">

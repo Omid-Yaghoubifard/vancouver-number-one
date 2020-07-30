@@ -12,4 +12,4 @@ $(".custom-file-input").on("change", function(){
     }
 });
 
-$(".fadeOutItems").delay(4000).fadeOut(500);
+$(".fade-out-items").delay(4000).fadeOut(500);

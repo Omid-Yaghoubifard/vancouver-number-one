@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     
-    <% if(typeof post == "object" && post){ %>
+    <% if(typeof post === "object" && post){ %>
       <meta name="description" content="<%= post.body.slice(0,210) %> ...">
     <% } else{ %>
       <meta name="description" content="Looking for Beautiful Vancouver's most popular attractions and top things to do? Look no further. This is the most comprehensive and user-friendly guide to our beautiful city.">
     <% }; %>
 
     <title>Vancouver Number One | 
-      <% if(typeof post == "object" && post){ %>
+      <% if(typeof post === "object" && post){ %>
         <%= post.title %>
       <% } else{ %>
         The Best Guide to Exploring Beautiful Vancouver
@@ -29,42 +29,42 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
     <link rel="manifest" href="/favicon/site.webmanifest">
-    </head>
-<body>
+  </head>
 
-  <div class="wrapper">
-    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
-      <div class="container">
-          <a class="navbar-brand pb-2" href="/">Home</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-        
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-              <% if(!user){ %>
-                <li class="nav-item">
-                  <a class="nav-link" href="/signup">Sign Up</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/login">Log In</a>
-                </li>
-              <% }else{ %>
-                <li class="nav-item active">
-                  <a class="nav-link" href="/profile">Logged in as <%= user.username %><span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/index/new">Create a New Post</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/logout">Log Out</a>
-                </li>
-              <% }; %>
-            </ul>
-            <form class="form-inline my-2 my-lg-0" action="/index/1" method="POST">
-              <input class="form-control mr-sm-2" id="navbar-search" type="search" placeholder="Search" aria-label="Search" name="search" maxlength="100" required>
-              <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-            </form>
-          </div>
-      </div>
-    </nav>
+  <body>
+    <div class="wrapper">
+      <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand pb-2" id="logo" href="/"><img src="/Logo.png" alt=""></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <% if(!user){ %>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/signup">Sign Up</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/login">Log In</a>
+                  </li>
+                <% }else{ %>
+                  <li class="nav-item active">
+                    <a class="nav-link" href="/profile">Hello <%= user.username %><span class="sr-only">(current)</span></a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/index/new">Add an Attraction</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/logout">Log Out</a>
+                  </li>
+                <% }; %>
+              </ul>
+              <form class="form-inline my-2 my-lg-0" action="/index/1" method="POST">
+                <input class="form-control mr-sm-2" id="navbar-search" type="search" placeholder="Search" aria-label="Search" name="search" maxlength="100" required>
+                <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+              </form>
+            </div>
+        </div>
+      </nav>

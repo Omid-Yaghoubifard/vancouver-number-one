@@ -24,6 +24,4 @@ const Post = new mongoose.Schema({
     fields: {type: [String], text: true}
 });
 
-// Pst.index({fields: "text"});
-
 module.exports = mongoose.model("Post", Post);

@@ -3,36 +3,33 @@
 <div class="container pt-5 mt-5 mb-3">
 
     <% messages.forEach(function(message){ %>
-        <% if (typeof message == "object" && message.length> 0) { %>
-            <p class="fadeOutItems text-secondary mb-4 open-sans-font"><%= message %></p>
+        <% if (typeof message === "object" && message.length) { %>
+            <p class="fade-out-items text-secondary mb-4 open-sans-font"><%= message %></p>
         <% } %>
     <% }) %>
 
     <div class="row">
-
-    <% posts.forEach(function(post){ %>
-
-        <div class="col-sm-6 col-lg-4 mb-5 very-small">
-            <div class="card-deck">
-                <div class="card">
-                <a href="/index/show/<%= post._id %>"><img class="card-img card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
-                <div class="card-body">
-                    <h5 class="card-title"><%= post.title %></h5>
-                    <p class="card-text"><%= post.body.slice(0,100) %> ...</p>
-                    <a href="/index/show/<%= post._id %>" class= "btn btn-outline-success">Read more</a>
-                </div>
+        <% posts.forEach(function(post){ %>
+            <div class="col-sm-6 col-lg-4 mb-5 very-small">
+                <div class="card-deck">
+                    <div class="card">
+                        <a href="/index/show/<%= post._id %>"><img class="card-img card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
+                        <div class="card-body">
+                            <h5 class="card-title"><%= post.title %></h5>
+                            <p class="card-text"><%= post.body.slice(0,100) %> ...</p>
+                            <a href="/index/show/<%= post._id %>" class= "btn btn-outline-success">Read more</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-    <% }); %>
-    
+        <% }); %>
     </div>
+
     <div>
         <% if (pages > 1) { %>
             <ul class="pagination mb-5">
                 <div id="centering">
-                <% if (current == 1) { %>
+                <% if (current === 1) { %>
                     <li class="disabled"><a> « </a></li>
                 <% } else { %>
                     <li><a href="/index/1<%= search %>"> « </a></li>
@@ -42,16 +39,16 @@
                     <li class="disabled"><a>...</a></li>
                 <% } %>
                 <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %>
-                    <% if (i == current) { %>
+                    <% if (i === current) { %>
                         <li class="active"><a><%= i %></a></li>
                     <% } else { %>
                         <li><a href="/index/<%= i %><%= search %>"><%= i %></a></li>
                     <% } %>
-                    <% if (i == Number(current) + 4 && i < pages) { %>
+                    <% if (i === Number(current) + 4 && i < pages) { %>
                         <li class="disabled"><a>...</a></li>
                     <% } %>
                 <% } %>
-                <% if (current == pages) { %>
+                <% if (current === pages) { %>
                     <li class="disabled"><a> » </a></li>
                 <% } else { %>
                     <li><a href="/index/<%= pages %><%= search %>"> » </a></li>

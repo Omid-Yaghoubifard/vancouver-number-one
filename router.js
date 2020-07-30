@@ -7,71 +7,31 @@ const express                              = require("express"),
       User                                 = require("./models/user"),
       Post                                 = require("./models/post"),
       Comment                              = require("./models/comment"),
+      isLoggedIn                           = require("./middlewares/isLoggedIn"),
+      isNotLoggedIn                        = require("./middlewares/isNotLoggedIn"),
+      loggedInUser                         = require("./middlewares/loggedInUser"),
+      upload                               = require("./middlewares/upload"),
       fetch                                = require("node-fetch"),
       flash                                = require("connect-flash"),
       cookieParser                         = require("cookie-parser"),
+      currentYear                          = new Date().getFullYear(),
       { celebrate, Joi, errors, Segments } = require("celebrate");
 
-
-// check isLoggedIn
-function isLoggedIn(req, res, next){
-    if (req.user){
-        next();
-    } else{
-        res.redirect("/login");
-    }
-};
-
-// check isNotLoggedIn
-function isNotLoggedIn(req, res, next){
-    if (!req.user){
-        next();
-    } else{
-        res.redirect("/index/1");
-    }
-};
-
-// check loggedInUser
-function loggedInUser(req, res, next){
-    Post.findById(req.params.id).populate("author").exec(function(err, post){
-        if(req.user.username === post.author[0].username){
-            next();
-        } else{
-            res.redirect("/index/show/"+req.params.id);
-        }
-})};
-
-// image storage
-const Storage = multer.diskStorage({
-    destination: function(req, file, callback) {
-        callback(null, "./public/images");
-    },
-    filename: function(req, file, callback) {
-        callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
-    }
-});
-
-const upload = multer({
-    storage: Storage,
-    fileFilter:(req,file,cb) => {
-        let extname = file.originalname.toLowerCase().match(/.(jpeg|jpg|png|gif|gif|tif|tiff)$/);
-        let mimetype = file.mimetype.match(/(jpeg|jpg|png|gif|gif|tif|tiff)$/);
-        if(mimetype && extname) cb(null,true);
-        else cb(new multer.MulterError ("Error: Images Only"));
-    },
-    limits: {fileSize: 750000},
-});
-
+    
 // homepage
 router.get("/", function(req, res) {
     res.render("home", {
         user: req.user,
+        currentYear
     });
 });
 
 // new
 router.get("/index/new", isLoggedIn, function(req, res){
-    res.render("new", {user: req.user, message1: req.flash("postFailed")
+    res.render("new", {
+        user: req.user,
+        currentYear,
+        messages: [req.flash("postFailed")]
     });
 });
 
@@ -79,10 +39,11 @@ router.get("/index/new", isLoggedIn, function(req, res){
 router.get("/index/:page", function(req, res, next) {
     const perPage = 12;
     const page = req.params.page || 1;
+    let search;
     if ("category" in req.query){
-        var search = "?category=" + req.query.category;
+        search = "?category=" + req.query.category;
     } else{
-        var search = "";
+        search = "";
     };
     Post
         .find(req.query || {})
@@ -92,12 +53,13 @@ router.get("/index/:page", function(req, res, next) {
             Post.countDocuments(req.query || {}).exec(function(err, count) {
                 if (err) return next(err)
                 res.render("index", {
-                    posts: posts,
+                    posts,
                     current: page,
                     pages: Math.ceil(count / perPage),
                     user: req.user,
-                    search: search,
-                    messages: [req.flash("postCreated"), req.flash("noMatch"), req.flash("errorMessage"), req.flash("deleted"), req.flash("userSignedUp"), req.flash("profileFailed"), req.flash("loggedOut")]
+                    search,
+                    currentYear,
+                    messages: [req.flash("noMatch"), req.flash("errorMessage"), req.flash("deleted"), req.flash("userSignedUp"), req.flash("profileFailed"), req.flash("loggedOut"), req.flash("loggedInUser")]
                 })
             })
         })
@@ -107,49 +69,51 @@ router.get("/index/:page", function(req, res, next) {
 router.post("/index", isLoggedIn, upload.single("image"),
     celebrate({
         body: Joi.object().keys({
-            title: Joi.string().max(100).uppercase().required(),
-            body: Joi.string().max(5000).required(),
+            title: Joi.string().max(100).trim().uppercase().required(),
+            body: Joi.string().max(5000).trim().required(),
             category: Joi.string().valid("Natural", "Cultural", "Events", "Man-Made").required(),
             url: Joi.string().uri().trim().required(),
         }),
     }),
     function(req, res){
-    fetch("https://api.mapbox.com/geocoding/v5/mapbox.places/" + req.body.title + ".json?types=poi&proximity=-123.13060,49.28562&limit=1&country=CA&access_token=" + process.env.MAPAPI)
-    .then(response => response.json())
-    .then(data => data.features[0].center)
-    .then(coordinates => {
-        let fullPost = {
-        title: req.body.title,
-        body: req.body.body,
-        category: req.body.category,
-        url: req.body.url,
-        author: req.user._id,
-        image: req.file.path,
-        location: coordinates
-        }
-        return fullPost
-    })
-    .then(fullPost => Post.create(fullPost, function (err, post) { 
-        if(err){
-            req.flash("postFailed", "Sorry. That title already exists.");
-            res.redirect("/index/new")   
-        } else{
-            req.flash("postCreated", "Well done! Your post was succesfully created.");
-            res.redirect("/index/1");
-        }
-    }));
-});
+        fetch("https://api.mapbox.com/geocoding/v5/mapbox.places/" + req.body.title + ".json?types=poi&proximity=-123.13060,49.28562&limit=1&country=CA&access_token=" + process.env.MAPAPI)
+        .then(response => response.json())
+        .then(data => data.features[0].center)
+        .then(coordinates => {
+            let fullPost = {
+                title: req.body.title,
+                body: req.body.body,
+                category: req.body.category,
+                url: req.body.url,
+                author: req.user._id,
+                image: req.file.path,
+                location: coordinates
+            }
+            return fullPost;
+        })
+        .then(fullPost => Post.create(fullPost, function (err, post) { 
+            if(err){
+                req.flash("postFailed", "ُSorry. There was an error. Please try again.");
+                res.redirect("/index/new")   
+            } else{
+                req.flash("postCreated", "Well done! Your post was succesfully created.");
+                res.redirect("/index/show/" + post._id);
+            }
+        }));
+    }
+);
 
 // show
 router.get("/index/show/:id", function(req, res){
     Post.findById(req.params.id).populate("author").populate({path:"comments", populate: {path: "author", model: "User"}}).exec(function(err, post){
         if(!err){
             res.render("show", {
-                post: post, 
+                post, 
                 user: req.user, 
                 WEATHERAPI: process.env.WEATHERAPI, 
                 MAP: process.env.MAPAPI,
-                messages: [req.flash("updated"), req.flash("deleteError")]  
+                currentYear,
+                messages: [req.flash("postCreated"), req.flash("updated"), req.flash("deleteError"), req.flash("notYourPost")]  
             });
         } else{
             req.flash("errorMessage", "Sorry. There was an error. Please try again");
@@ -162,7 +126,7 @@ router.get("/index/show/:id", function(req, res){
 router.post("/index/1",
     celebrate({
         body: Joi.object().keys({
-            search: Joi.string().max(100).uppercase().required(),
+            search: Joi.string().max(100).trim().uppercase().required(),
         }),
     }),
     function(req, res){
@@ -172,14 +136,19 @@ router.post("/index/1",
                 res.redirect("/index/1");
             } else{
                 res.redirect("/index/show/"+post._id);
-        }
-    })
-});
+            }
+        })
+    }
+);
 
 // edit
 router.get("/index/show/:id/edit", isLoggedIn, loggedInUser, function(req, res){
     Post.findById(req.params.id).populate("author").exec(function(err, post){
-        res.render("edit", {user: req.user, post: post})
+        res.render("edit", {
+            user: req.user, 
+            post,
+            currentYear
+        })
     })
 });
 
@@ -187,8 +156,8 @@ router.get("/index/show/:id/edit", isLoggedIn, loggedInUser, function(req, res){
 router.put("/index/show/:id", isLoggedIn, loggedInUser, upload.single("image"),
     celebrate({
         body: Joi.object().keys({
-            title: Joi.string().max(100).uppercase().required(),
-            body: Joi.string().max(5000).required(),
+            title: Joi.string().max(100).trim().uppercase().required(),
+            body: Joi.string().max(5000).trim().required(),
             category: Joi.string().valid("Natural", "Cultural", "Events", "Man-Made").required(),
             url: Joi.string().uri().trim().required(),
         }),
@@ -198,17 +167,17 @@ router.put("/index/show/:id", isLoggedIn, loggedInUser, upload.single("image"),
         .then(response => response.json())
         .then(data => data.features[0].center)
         .then(coordinates => {
-        let editedPost = {
-            title: req.body.title,
-            body: req.body.body,
-            category: req.body.category,
-            url: req.body.url,
-            location: coordinates
+            let editedPost = {
+                title: req.body.title,
+                body: req.body.body,
+                category: req.body.category,
+                url: req.body.url,
+                location: coordinates
             }
-        return editedPost
+            return editedPost
         })
         .then(editedPost => Post.findByIdAndUpdate(req.params.id, editedPost, function(err, modified){
-            if(req.file != undefined){
+            if(req.file !== undefined){
                 Post.findByIdAndUpdate(req.params.id, {image: req.file.path}, function(err, modifiedImage){
                     req.flash("updated", "Well done! Your post was successfully updated.");
                     res.redirect("/index/show/"+req.params.id)
@@ -218,16 +187,17 @@ router.put("/index/show/:id", isLoggedIn, loggedInUser, upload.single("image"),
                 res.redirect("/index/show/"+req.params.id);
             }
         }))
-});
+    }
+);
 
 //comment
 router.post("/index/show/:id", isLoggedIn,
     celebrate({
         body: Joi.object().keys({
-            text: Joi.string().max(1000).required(),
+            text: Joi.string().max(1000).trim().required(),
         }),
     }),
-    function(req,res){
+    function(req, res){
         let newComment = {
             text: req.body.text,
             author: req.user._id
@@ -240,13 +210,20 @@ router.post("/index/show/:id", isLoggedIn,
                     })
                 } else{
                     res.redirect("/index/show/"+req.params.id);
-    }})
-});
+                }
+            }
+        )
+    }
+);
 
 // delete
 router.get("/index/show/:id/delete", isLoggedIn, loggedInUser, function(req,res){
     Post.findById(req.params.id).populate("author").exec(function(err, post){
-        res.render("delete", {user: req.user, post: post})
+        res.render("delete", {
+            user: req.user,
+            post,
+            currentYear
+        })
     })
 });
 
@@ -266,56 +243,62 @@ router.delete("/index/show/:id", isLoggedIn, loggedInUser, function(req,res){
 router.get("/signup", isNotLoggedIn, function(req,res){
     res.render("signup", {
         user: req.user,
-        messages: [req.flash("passwordMatch"), req.flash("signUpError")]
+        currentYear,
+        messages: [req.flash("passwordMatch"), req.flash("signUpUserError"), req.flash("signUpEmailError")]
     });
 });
 
 router.post("/signup", isNotLoggedIn,
     celebrate({
         body: Joi.object().keys({
-            username: Joi.string().min(3).max(30).required(),
-            email: Joi.string().email().lowercase().required(),
-            password: Joi.string().min(8).max(256).required(),
-            password2: Joi.string().min(8).max(256).required(),
+            username: Joi.string().min(3).max(30).trim().required(),
+            email: Joi.string().email().lowercase().trim().required(),
+            password: Joi.string().min(8).max(256).trim().required(),
+            password2: Joi.string().min(8).max(256).trim().required(),
         }),
     }),
     function(req, res) {
-        if(req.body.password != req.body.password2) {
+        if(req.body.password !== req.body.password2) {
             req.flash("passwordMatch", "Please make sure you enter the same password twice.");
             res.redirect("/signup");
         } else {
         User.register(new User({ username : req.body.username }), req.body.password, function(err, newUser) {
             if (err) {
-                req.flash("signUpError", "Sorry. That username already exists. Please try another username.");
+                req.flash("signUpUserError", "Sorry. That username already exists. Please try another username.");
                 res.redirect("/signup");
             } else {
-            User.findOne({ username:req.body.username }, function (err, foundUser) {
-                if (err) {
-                    console.log(err);
-                } else
-                    foundUser.email = req.body.email;
-                    foundUser.save();
-            })
-            passport.authenticate("local")(req, res, function () {
-                req.flash("userSignedUp", "Congratulations! Your account was created successfully.");
-                res.redirect("/index/1");
-            });
-        }});
-}});
+                User.findOne({ username:req.body.username }, function (err, foundUser) {
+                    if (err) {
+                        req.flash("signUpEmailError", "Sorry. There was an error signing you up. Please try again.");
+                        res.redirect("/signup");
+                    } else {
+                        foundUser.email = req.body.email;
+                        foundUser.save();
+                    }
+                })
+                    passport.authenticate("local")(req, res, function () {
+                        req.flash("userSignedUp", "Congratulations! Your account was created successfully.");
+                        res.redirect("/index/1");
+                    })
+            };
+        })};
+    }
+);
 
 //login
 router.get("/login", isNotLoggedIn, function(req,res){
     res.render("login", {
         user: req.user,
-        message1: req.flash("failedLogIn")
+        currentYear,
+        messages: [req.flash("failedLogIn"), req.flash("PleaseLogIn")]
     });
 });
 
 router.post("/login", isNotLoggedIn,
     celebrate({
         body: Joi.object().keys({
-            username: Joi.string().min(3).max(30).required(),
-            password: Joi.string().min(8).max(256).required(),
+            username: Joi.string().min(3).max(30).trim().required(),
+            password: Joi.string().min(8).max(256).trim().required(),
         }),
     }),
     passport.authenticate("local", {failureRedirect: "/loginfailed"}),
@@ -334,8 +317,9 @@ router.get("/profile", isLoggedIn, function(req,res){
         if(!err && req.user){
             res.render("profile", {
                 user:req.user, 
-                posts:posts,
-                message1: req.flash("passwordChange") 
+                posts,
+                currentYear,
+                messages: [req.flash("passwordChange")] 
             });
         }
         else{
@@ -348,6 +332,7 @@ router.get("/profile", isLoggedIn, function(req,res){
 router.get("/profile/edit", isLoggedIn, function(req,res){
     res.render("profileEdit", {
         user: req.user,
+        currentYear,
         messages: [req.flash("passwordMatch"), req.flash("passwordChangeError")]
     });
 });
@@ -355,12 +340,12 @@ router.get("/profile/edit", isLoggedIn, function(req,res){
 router.post("/profile", isLoggedIn, 
     celebrate({
         body: Joi.object().keys({
-            password: Joi.string().min(8).max(256).required(),
-            password2: Joi.string().min(8).max(256).required(),
+            password: Joi.string().min(8).max(256).trim().required(),
+            password2: Joi.string().min(8).max(256).trim().required(),
         }),
     }),
     function(req, res) {
-        if(req.body.password != req.body.password2) {
+        if(req.body.password !== req.body.password2) {
             req.flash("passwordMatch", "Please make sure you enter the same password twice.");
             res.redirect("/profile/edit");
         } else {
@@ -376,7 +361,9 @@ router.post("/profile", isLoggedIn,
                     res.redirect("/profile/edit");
                 }
             })
-}});
+        }
+    }
+);
 
 // logout
 router.get("/logout", isLoggedIn, function(req, res){
@@ -390,4 +377,4 @@ router.get("*", function(req, res){
     res.render("404")
 });
 
-module.exports = router
+module.exports = router;
