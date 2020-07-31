@@ -1,23 +1,17 @@
-const express                              = require("express"),
-      router                               = express.Router(),
-      bodyParser                           = require("body-parser"),
-      multer                               = require("multer"),
-      passport                             = require("passport"),
-      methodOverride                       = require("method-override"),
-      User                                 = require("./models/user"),
-      Post                                 = require("./models/post"),
-      Comment                              = require("./models/comment"),
-      isLoggedIn                           = require("./middlewares/isLoggedIn"),
-      isNotLoggedIn                        = require("./middlewares/isNotLoggedIn"),
-      loggedInUser                         = require("./middlewares/loggedInUser"),
-      upload                               = require("./middlewares/upload"),
-      fetch                                = require("node-fetch"),
-      flash                                = require("connect-flash"),
-      cookieParser                         = require("cookie-parser"),
-      currentYear                          = new Date().getFullYear(),
-      { celebrate, Joi, errors, Segments } = require("celebrate");
+const express            = require("express"),
+      router             = express.Router(),
+      passport           = require("passport"),
+      User               = require("./models/user"),
+      Post               = require("./models/post"),
+      Comment            = require("./models/comment"),
+      isLoggedIn         = require("./middlewares/isLoggedIn"),
+      isNotLoggedIn      = require("./middlewares/isNotLoggedIn"),
+      loggedInUser       = require("./middlewares/loggedInUser"),
+      upload             = require("./middlewares/upload"),
+      fetch              = require("node-fetch"),
+      currentYear        = new Date().getFullYear(),
+      { celebrate, Joi } = require("celebrate");
 
-    
 // homepage
 router.get("/", function(req, res) {
     res.render("home", {

@@ -1,19 +1,16 @@
-                                             require("dotenv").config();
-const express                              = require("express"),
-      bodyParser                           = require("body-parser"),
-      multer                               = require("multer"),
-      mongoose                             = require("mongoose"),
-      ejs                                  = require("ejs"),
-      session                              = require("express-session"),
-      router                               = require("./router"),
-      passport                             = require("passport"),
-      passportLocalMongoose                = require("passport-local-mongoose"),
-      methodOverride                       = require("method-override"),
-      flash                                = require("connect-flash"),
-      cookieParser                         = require("cookie-parser"),
-      app                                  = express(),
-      { celebrate, Joi, errors, Segments } = require("celebrate");
-
+                       require("dotenv").config();
+const express        = require("express"),
+      bodyParser     = require("body-parser"),
+      multer         = require("multer"),
+      mongoose       = require("mongoose"),
+      session        = require("express-session"),
+      router         = require("./router"),
+      passport       = require("passport"),
+      methodOverride = require("method-override"),
+      flash          = require("connect-flash"),
+      cookieParser   = require("cookie-parser"),
+      app            = express(),
+      { errors }     = require("celebrate");
 
 app.set ("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
