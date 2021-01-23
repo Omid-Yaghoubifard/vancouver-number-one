@@ -1,0 +1,31 @@
+<%- include("partials/header") %>
+
+<div class="container mt-5 pt-5">
+    <% if(comments && comments.length){ %>
+        <div>
+            <table class="table table-hover table-striped table-primary mt-3">
+                <thead>
+                    <tr>
+                        <th scope="col">Author</th>
+                        <th scope="col">Comment</th>
+                        <th scope="col">Approve Comment</th>
+                        <th scope="col">Delete Comment</th>
+                    </tr>
+                </thead>
+                <tbody class="tBody">
+                    <% comments.forEach(item =>{ %>
+                        <% let color = item.flagged ? "btn-danger" : "btn-primary" %>
+                        <tr>
+                            <th scope="row"> <a target="_blank" href="/users/1?order=views&direction=-1&user=<%= item.author[0]._id %>"><%= item.author[0].username %></a> </th>
+                            <td> <span class="text-primary profile-def"><%= item.text %></span> </td>
+                            <td> <button value="<%= item._id %>" class="approve-comment like-button-border ml-5 text-primary" target="_blank"><i class="fas fa-check"></i></button> </td>
+                            <td> <button value="<%= item._id %>" class="delete-comment like-button-border ml-5 text-danger" target="_blank"><i class="fas fa-trash-alt"></i></button> </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</div>
+
+<%- include("partials/footer") %>

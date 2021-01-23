@@ -14,7 +14,7 @@ const express        = require("express"),
 
 app.set ("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
-app.use(["/index/public/images", "/index/show/public/images", "/public/images"], express.static(__dirname + "/public/images"));
+app.use(["/index/public/images", "/index/show/public/images", "/public/images", "/users/public/images"], express.static(__dirname + "/public/images"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
@@ -49,6 +49,6 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.listen(process.env.PORT || 3000, process.env.IP, function(){
+app.listen(process.env.PORT || 3001, process.env.IP, function(){
     console.log("Server has started");
 })

@@ -9,26 +9,20 @@
       
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
             <% if (searchTitle !== "Most Viewed"){ %>
-                <a class="dropdown-item" href="/index/<%= current %>?order=views&direction=-1<%= search %>"> Most Viewed </a>
+                <a class="dropdown-item" href="/users/<%= current %>?order=views&direction=-1<%= search %>"> Most Viewed </a>
             <% } %>
             <% if (searchTitle !== "Top Rated"){ %>
-                <a class="dropdown-item" href="/index/<%= current %>?order=rating&direction=-1<%= search %>"> Top Rated </a>
+                <a class="dropdown-item" href="/users/<%= current %>?order=rating&direction=-1<%= search %>"> Top Rated </a>
             <% } %>
             <% if (searchTitle !== "Newest"){ %>
-                <a class="dropdown-item" href="/index/<%= current %>?order=date&direction=-1<%= search %>"> Newest </a>
+                <a class="dropdown-item" href="/users/<%= current %>?order=date&direction=-1<%= search %>"> Newest </a>
             <% } %>
             <% if (searchTitle !== "Oldest"){ %>
-                <a class="dropdown-item" href="/index/<%= current %>?order=date&direction=1<%= search %>"> Oldest </a>
+                <a class="dropdown-item" href="/users/<%= current %>?order=date&direction=1<%= search %>"> Oldest </a>
             <% } %>
         </div>
     </div>
     <hr class="style-one mt-5 mb-3">
-
-    <% messages.forEach(message =>{ %>
-        <% if (typeof message === "object" && message.length) { %>
-            <p class="fade-out-items text-secondary mb-4 open-sans-font"><%= message %></p>
-        <% } %>
-    <% }) %>
 
     <div class="row">
         <% posts.forEach(post =>{ %>
@@ -54,7 +48,7 @@
                 <% if (current === 1) { %>
                     <li class="disabled"><a> « </a></li>
                 <% } else { %>
-                    <li><a href="/index/1<%= sortBy %><%= direc %><%= search %>"> « </a></li>
+                    <li><a href="/users/1<%= sortBy %><%= direc %><%= search %>"> « </a></li>
                 <% } %>
                 <% let i = (Number(current) > 5 ? Number(current) - 4 : 1) %>
                 <% if (i !== 1) { %>
@@ -64,7 +58,7 @@
                     <% if (i === current) { %>
                         <li class="active"><a><%= i %></a></li>
                     <% } else { %>
-                        <li><a href="/index/<%= i %><%= sortBy %><%= direc %><%= search %>"><%= i %></a></li>
+                        <li><a href="/users/<%= i %><%= sortBy %><%= direc %><%= search %>"><%= i %></a></li>
                     <% } %>
                     <% if (i === Number(current) + 4 && i < pages) { %>
                         <li class="disabled"><a>...</a></li>
@@ -73,7 +67,7 @@
                 <% if (current === pages) { %>
                     <li class="disabled"><a> » </a></li>
                 <% } else { %>
-                    <li><a href="/index/<%= pages %><%= sortBy %><%= direc %><%= search %>"> » </a></li>
+                    <li><a href="/users/<%= pages %><%= sortBy %><%= direc %><%= search %>"> » </a></li>
                 <% } %>
                 </div>
             </ul>

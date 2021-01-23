@@ -7,53 +7,129 @@ const express            = require("express"),
       isLoggedIn         = require("./middlewares/isLoggedIn"),
       isNotLoggedIn      = require("./middlewares/isNotLoggedIn"),
       loggedInUser       = require("./middlewares/loggedInUser"),
+      isAdmin            = require("./middlewares/isAdmin"),
       upload             = require("./middlewares/upload"),
       fetch              = require("node-fetch"),
-      currentYear        = new Date().getFullYear(),
-      { celebrate, Joi } = require("celebrate");
+      { celebrate, Joi } = require("celebrate"),
+      Filter             = require('bad-words'),
+      filter             = new Filter(),
+      fs                 = require("fs");
+
+
 
 // homepage
-router.get("/", function(req, res) {
+router.get("/", (req, res) =>{
+    let path = req.route.path;
     res.render("home", {
         user: req.user,
-        currentYear
+        path
     });
 });
 
 // new
-router.get("/index/new", isLoggedIn, function(req, res){
+router.get("/index/new", isLoggedIn, (req, res) =>{
+    let path = req.route.path;
     res.render("new", {
         user: req.user,
-        currentYear,
-        messages: [req.flash("postFailed")]
+        path,
+        messages: [req.flash("postFailed"), req.flash("titleError")]
     });
 });
 
 // index
-router.get("/index/:page", function(req, res, next) {
+router.get("/index/:page", (req, res, next) =>{
+    let path = req.route.path;
     const perPage = 12;
-    const page = req.params.page || 1;
+    const page = Number(req.params.page) || 1;
+    let originalUrl = req.originalUrl;
     let search;
-    if ("category" in req.query){
-        search = "?category=" + req.query.category;
-    } else{
-        search = "";
-    };
+    "category" in req.query ? search = `&category=${req.query.category}` : search = "";
+    let sort = req.query.order || "views"
+    let sortBy = `?order=${sort}`;
+    let sortDirect = parseInt(req.query.direction) || -1
+    let direc = `&direction=${sortDirect}`;
+    let searchTitle;
+    if (sort === "views") {
+        searchTitle = "Most Viewed"
+    } else if (sort === "rating") {
+        searchTitle = "Top Rated"
+    } else if (sort === "date" && sortDirect === -1) {
+        searchTitle = "Newest"
+    } else if (sort === "date" && sortDirect === 1) {
+        searchTitle = "Oldest"
+    }
     Post
-        .find(req.query || {})
+        .find(req.query.category ? {category : req.query.category} : {})
+        .find({verified : true})
+        .sort({[sort]: sortDirect})
         .skip((perPage * page) - perPage)
         .limit(perPage)
-        .exec(function(err, posts) {
-            Post.countDocuments(req.query || {}).exec(function(err, count) {
+        .exec((err, posts) =>{
+            Post.countDocuments(req.query.category ? {category : req.query.category} : {})
+                .find({verified : true})
+                .exec((err, count) =>{
                 if (err) return next(err)
                 res.render("index", {
                     posts,
                     current: page,
-                    pages: Math.ceil(count / perPage),
+                    pages: Math.ceil(count.length / perPage),
                     user: req.user,
                     search,
-                    currentYear,
-                    messages: [req.flash("noMatch"), req.flash("errorMessage"), req.flash("deleted"), req.flash("userSignedUp"), req.flash("profileFailed"), req.flash("loggedOut"), req.flash("loggedInUser")]
+                    sortBy,
+                    direc,
+                    originalUrl,
+                    searchTitle,
+                    path,
+                    messages: [req.flash("noMatch"), req.flash("errorMessage"), req.flash("deleted"), req.flash("userSignedUp"), req.flash("profileFailed"), req.flash("loggedOut"), req.flash("loggedInUser"), req.flash("notAdmin")]
+                })
+            })
+        })
+});
+
+// user posts
+router.get("/users/:page", (req, res, next) =>{
+    let path = req.route.path;
+    const perPage = 12;
+    const page = Number(req.params.page) || 1;
+    let originalUrl = req.originalUrl;
+    let search = `&user=${req.query.user}`;
+    let sort = req.query.order || "views"
+    let sortBy = `?order=${sort}`;
+    let sortDirect = parseInt(req.query.direction) || -1
+    let direc = `&direction=${sortDirect}`;
+    let searchTitle;
+    if (sort === "views") {
+        searchTitle = "Most Viewed"
+    } else if (sort === "rating") {
+        searchTitle = "Top Rated"
+    } else if (sort === "date" && sortDirect === -1) {
+        searchTitle = "Newest"
+    } else if (sort === "date" && sortDirect === 1) {
+        searchTitle = "Oldest"
+    }
+    Post
+        .find({author: req.query.user})
+        .find({verified : true})
+        .sort({[sort]: sortDirect})
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec((err, posts) =>{
+            Post.countDocuments({author: req.query.user})
+                .find({verified : true})
+                .exec((err, count) =>{
+                if (err) return next(err)
+                res.render("userPosts", {
+                    posts,
+                    current: page,
+                    pages: Math.ceil(count.length / perPage),
+                    user: req.user,
+                    search,
+                    sortBy,
+                    direc,
+                    originalUrl,
+                    searchTitle,
+                    path,
+                    messages: [req.flash("noMatch"), req.flash("errorMessage"), req.flash("deleted"), req.flash("userSignedUp"), req.flash("profileFailed"), req.flash("loggedOut"), req.flash("loggedInUser"), req.flash("notAdmin")]
                 })
             })
         })
@@ -63,20 +139,22 @@ router.get("/index/:page", function(req, res, next) {
 router.post("/index", isLoggedIn, upload.single("image"),
     celebrate({
         body: Joi.object().keys({
-            title: Joi.string().max(100).trim().uppercase().required(),
+            title: Joi.string().max(100).trim().lowercase().required(),
             body: Joi.string().max(5000).trim().required(),
             category: Joi.string().valid("Natural", "Cultural", "Events", "Man-Made").required(),
             url: Joi.string().uri().trim().required(),
+            checkbox: Joi.valid("on").required()
         }),
     }),
-    function(req, res){
-        fetch("https://api.mapbox.com/geocoding/v5/mapbox.places/" + req.body.title + ".json?types=poi&proximity=-123.13060,49.28562&limit=1&country=CA&access_token=" + process.env.MAPAPI)
+    (req, res) =>{
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${req.body.title}.json?types=poi&proximity=-123.13060,49.28562&limit=1&country=CA&access_token=${process.env.MAPAPI}`)
         .then(response => response.json())
         .then(data => data.features[0].center)
         .then(coordinates => {
+            let tempTitle = req.body.title.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()).replace(" Of ", " of ");
             let fullPost = {
-                title: req.body.title,
-                body: req.body.body,
+                title: filter.clean(tempTitle),
+                body: filter.clean(req.body.body),
                 category: req.body.category,
                 url: req.body.url,
                 author: req.user._id,
@@ -85,33 +163,72 @@ router.post("/index", isLoggedIn, upload.single("image"),
             }
             return fullPost;
         })
-        .then(fullPost => Post.create(fullPost, function (err, post) { 
+        .then(fullPost => Post.create(fullPost, (err, post) =>{ 
             if(err){
                 req.flash("postFailed", "ُSorry. There was an error. Please try again.");
                 res.redirect("/index/new")   
             } else{
                 req.flash("postCreated", "Well done! Your post was succesfully created.");
-                res.redirect("/index/show/" + post._id);
+                res.redirect(`/index/show/${post._id}`);
             }
-        }));
+        }))
+        .catch(err => {
+            fs.unlinkSync(req.file.path);
+            req.flash("titleError", "Please make sure the title is typed correctly and try again.");
+            res.redirect("/index/new")   
+        });
     }
 );
 
 // show
-router.get("/index/show/:id", function(req, res){
-    Post.findById(req.params.id).populate("author").populate({path:"comments", populate: {path: "author", model: "User"}}).exec(function(err, post){
+router.get("/index/show/:id", (req, res) =>{
+    let path = req.route.path;
+    Post.findByIdAndUpdate(req.params.id, {$inc : {views : 1}}).populate("author").populate({path:"comments", populate: {path: "author", model: "User"}}).exec((err, post) =>{
         if(!err){
+            post.views++;
             res.render("show", {
                 post, 
-                user: req.user, 
+                user: req.user,
                 WEATHERAPI: process.env.WEATHERAPI, 
                 MAP: process.env.MAPAPI,
-                currentYear,
-                messages: [req.flash("postCreated"), req.flash("updated"), req.flash("deleteError"), req.flash("notYourPost")]  
+                path,
+                messages: [req.flash("postCreated"), req.flash("updated"), req.flash("deleteError"), req.flash("notYourPost"), req.flash("editError"), req.flash("commentError"), req.flash("commentApprove")]  
             });
         } else{
             req.flash("errorMessage", "Sorry. There was an error. Please try again");
-            res.redirect("/index/1");
+            res.redirect("/index/1?order=views&direction=-1");
+        }
+    })
+});
+
+// verify posts
+router.get("/verifyPost", isLoggedIn, isAdmin, (req, res) =>{
+    let postId = req.query.id;
+    Post.findByIdAndUpdate(postId, {verified: true}, (err, post) =>{})
+});
+
+// verify comments
+router.get("/verifyComment", isLoggedIn, isAdmin, (req, res) =>{
+    let commentId = req.query.id;
+    Comment.findByIdAndUpdate(commentId, {verified: true}, (err, comment) =>{})
+});
+
+// delete comments
+router.get("/deleteComment", isLoggedIn, isAdmin, (req, res) =>{
+    let commentId = req.query.id;
+    Comment.findByIdAndRemove(commentId, (err, comment) =>{
+        Post.findByIdAndUpdate(comment.postId, { $pull: {comments : commentId } }, (err, updated) =>{})
+    });
+});
+
+router.get("/updateRating", (req, res) =>{
+    let change = req.query.change;
+    let postId = req.query.id;
+    Post.findByIdAndUpdate(postId, {$inc : {rating : change}}).exec((err, post) =>{
+        if (!post.usersLiking.includes(req.user._id)) {
+            Post.findByIdAndUpdate(postId, { $push: { usersLiking: req.user._id } }, (err, updated) =>{})
+        } else{
+            Post.findByIdAndUpdate(postId, { $pull: { usersLiking: req.user._id } }, (err, updated) =>{})
         }
     })
 });
@@ -123,25 +240,43 @@ router.post("/index/1",
             search: Joi.string().max(100).trim().uppercase().required(),
         }),
     }),
-    function(req, res){
-        Post.findOne({title: new RegExp(req.body.search, "i")}).exec(function(err, post){
+    (req, res) =>{
+        Post.findOne({title: new RegExp(req.body.search, "i")}).exec((err, post) =>{
             if(!post || err){
                 req.flash("noMatch", "Sorry. There was no result that matched your search query.");
-                res.redirect("/index/1");
+                res.redirect("/index/1?order=views&direction=-1");
             } else{
-                res.redirect("/index/show/"+post._id);
+                res.redirect(`/index/show/${post._id}`);
             }
         })
     }
 );
 
+router.get("/title-search/:id", (req, res) =>{
+    Post.find({}).sort({views: -1}).exec((err, posts) =>{
+        if(!posts || err){
+            console.log("error");
+        } else{
+            const results = posts.filter(post => post.title.toLowerCase().includes(req.params.id.toLowerCase()))
+                .reduce((acc, current) => {
+                    return acc.concat(
+                        current.title
+                    );
+                }, []);; 
+            // console.log(results);
+            res.json(results)
+        }
+    })
+});
+
 // edit
-router.get("/index/show/:id/edit", isLoggedIn, loggedInUser, function(req, res){
-    Post.findById(req.params.id).populate("author").exec(function(err, post){
+router.get("/index/show/:id/edit", isLoggedIn, loggedInUser, (req, res) =>{
+    let path = req.route.path;
+    Post.findById(req.params.id).populate("author").exec((err, post) =>{
         res.render("edit", {
             user: req.user, 
             post,
-            currentYear
+            path
         })
     })
 });
@@ -150,37 +285,56 @@ router.get("/index/show/:id/edit", isLoggedIn, loggedInUser, function(req, res){
 router.put("/index/show/:id", isLoggedIn, loggedInUser, upload.single("image"),
     celebrate({
         body: Joi.object().keys({
-            title: Joi.string().max(100).trim().uppercase().required(),
+            title: Joi.string().max(100).trim().required(),
             body: Joi.string().max(5000).trim().required(),
             category: Joi.string().valid("Natural", "Cultural", "Events", "Man-Made").required(),
             url: Joi.string().uri().trim().required(),
+            location1: Joi.number(),
+            location2: Joi.number(),
+            checkbox: Joi.valid("on").required(),
+            imageAttribute: Joi.string().trim().allow(""),
+            ticketReserve: Joi.string().trim().allow("")
         }),
     }),
-    function(req, res){
-        fetch("https://api.mapbox.com/geocoding/v5/mapbox.places/" + req.body.title + ".json?types=poi&proximity=-123.13060,49.28562&limit=1&country=CA&access_token=" + process.env.MAPAPI)
+    (req, res) =>{
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${req.body.title}.json?types=poi&proximity=-123.13060,49.28562&limit=1&country=CA&access_token=${process.env.MAPAPI}`)
         .then(response => response.json())
         .then(data => data.features[0].center)
         .then(coordinates => {
+            let tempTitle;
+            req.user.username !== "Admin" ? tempTitle = req.body.title.replace(/(\B)[^ ]*/g, match => (match.toLowerCase())).replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()).replace(" Of ", " of ") : tempTitle = req.body.title;
+            let tempCoordinates = req.body.location1 ? [req.body.location1, req.body.location2]: coordinates;
             let editedPost = {
-                title: req.body.title,
-                body: req.body.body,
+                title: filter.clean(tempTitle),
+                body: filter.clean(req.body.body),
                 category: req.body.category,
                 url: req.body.url,
-                location: coordinates
+                location: tempCoordinates,
+                verified: false
             }
-            return editedPost
+            req.body.imageAttribute ? editedPost.imageAttribute = req.body.imageAttribute : editedPost.imageAttribute = "";
+            req.body.ticketReserve ? editedPost.ticketReserve = req.body.ticketReserve : editedPost.ticketReserve = "";
+            return editedPost;
         })
-        .then(editedPost => Post.findByIdAndUpdate(req.params.id, editedPost, function(err, modified){
+        .then(editedPost => Post.findByIdAndUpdate(req.params.id, editedPost, (err, modified) =>{
             if(req.file !== undefined){
-                Post.findByIdAndUpdate(req.params.id, {image: req.file.path}, function(err, modifiedImage){
+                fs.unlinkSync(modified.image);
+                Post.findByIdAndUpdate(req.params.id, {image: req.file.path}, (err, modifiedImage) =>{
                     req.flash("updated", "Well done! Your post was successfully updated.");
-                    res.redirect("/index/show/"+req.params.id)
+                    res.redirect(`/index/show/${req.params.id}`)
                 })   
             }else{
                 req.flash("updated", "Well done! Your post was successfully updated.");
-                res.redirect("/index/show/"+req.params.id);
+                res.redirect(`/index/show/${req.params.id}`);
             }
         }))
+        .catch(err => {
+            if(req.file !== undefined){
+                fs.unlinkSync(req.file.path);
+            }
+            req.flash("editError", "Sorry. There was an error. Please try again");
+            res.redirect(`/index/show/${req.params.id}`)   
+        });
     }
 );
 
@@ -191,19 +345,22 @@ router.post("/index/show/:id", isLoggedIn,
             text: Joi.string().max(1000).trim().required(),
         }),
     }),
-    function(req, res){
+    (req, res) =>{
         let newComment = {
-            text: req.body.text,
-            author: req.user._id
+            text: filter.clean(req.body.text),
+            author: req.user._id,
+            postId: req.params.id
         }
         Comment.create(
-            newComment, function(err, createdComment){
+            newComment, (err, createdComment) =>{
                 if(!err){
-                    Post.findByIdAndUpdate(req.params.id, {$push: {comments: createdComment._id}}, function(err, updated){
-                        res.redirect("/index/show/"+req.params.id);
+                    Post.findByIdAndUpdate(req.params.id, {$push: {comments: createdComment._id}}, (err, updated) =>{
+                        req.flash("commentApprove", "Your comment will be published shortly after being reviewed by an admin.");
+                        res.redirect(`/index/show/${req.params.id}`);
                     })
                 } else{
-                    res.redirect("/index/show/"+req.params.id);
+                    req.flash("commentError", "There was an error. Please try again.");
+                    res.redirect(`/index/show/${req.params.id}`);
                 }
             }
         )
@@ -211,33 +368,39 @@ router.post("/index/show/:id", isLoggedIn,
 );
 
 // delete
-router.get("/index/show/:id/delete", isLoggedIn, loggedInUser, function(req,res){
-    Post.findById(req.params.id).populate("author").exec(function(err, post){
+router.get("/index/show/:id/delete", isLoggedIn, loggedInUser, (req, res) =>{
+    let path = req.route.path;
+    Post.findById(req.params.id).populate("author").exec((err, post) =>{
         res.render("delete", {
             user: req.user,
             post,
-            currentYear
+            path
         })
     })
 });
 
-router.delete("/index/show/:id", isLoggedIn, loggedInUser, function(req,res){
-    Post.findByIdAndRemove(req.params.id, function(err, post){
+router.delete("/index/show/:id", isLoggedIn, loggedInUser, (req, res) =>{
+    Post.findByIdAndRemove(req.params.id, (err, post) =>{
         if(err){
             req.flash("deleteError", "Sorry. There was an error deleting the post");
-            res.redirect("/index/show/"+req.params.id);
+            res.redirect(`/index/show/${req.params.id}`);
         } else{
+            fs.unlinkSync(post.image);
+            post.comments.forEach(commentId => {
+                Comment.findByIdAndRemove(commentId, (err, comment) =>{});
+            });
             req.flash("deleted", "Your post was successfully deleted.");
-            res.redirect("/index/1");
+            res.redirect("/index/1?order=views&direction=-1");
         }
     });
 });
 
 //signup
-router.get("/signup", isNotLoggedIn, function(req,res){
+router.get("/signup", isNotLoggedIn, (req, res) =>{
+    let path = req.route.path;
     res.render("signup", {
         user: req.user,
-        currentYear,
+        path,
         messages: [req.flash("passwordMatch"), req.flash("signUpUserError"), req.flash("signUpEmailError")]
     });
 });
@@ -249,19 +412,20 @@ router.post("/signup", isNotLoggedIn,
             email: Joi.string().email().lowercase().trim().required(),
             password: Joi.string().min(8).max(256).trim().required(),
             password2: Joi.string().min(8).max(256).trim().required(),
+            checkbox: Joi.valid("on").required()
         }),
     }),
-    function(req, res) {
+    (req, res) =>{
         if(req.body.password !== req.body.password2) {
             req.flash("passwordMatch", "Please make sure you enter the same password twice.");
             res.redirect("/signup");
         } else {
-        User.register(new User({ username : req.body.username }), req.body.password, function(err, newUser) {
+        User.register(new User({ username : req.body.username }), req.body.password, (err, newUser) =>{
             if (err) {
                 req.flash("signUpUserError", "Sorry. That username already exists. Please try another username.");
                 res.redirect("/signup");
             } else {
-                User.findOne({ username:req.body.username }, function (err, foundUser) {
+                User.findOne({ username:req.body.username }, (err, foundUser) =>{
                     if (err) {
                         req.flash("signUpEmailError", "Sorry. There was an error signing you up. Please try again.");
                         res.redirect("/signup");
@@ -270,9 +434,9 @@ router.post("/signup", isNotLoggedIn,
                         foundUser.save();
                     }
                 })
-                    passport.authenticate("local")(req, res, function () {
+                    passport.authenticate("local")(req, res, () =>{
                         req.flash("userSignedUp", "Congratulations! Your account was created successfully.");
-                        res.redirect("/index/1");
+                        res.redirect("/index/1?order=views&direction=-1");
                     })
             };
         })};
@@ -280,10 +444,11 @@ router.post("/signup", isNotLoggedIn,
 );
 
 //login
-router.get("/login", isNotLoggedIn, function(req,res){
+router.get("/login", isNotLoggedIn, (req, res) =>{
+    let path = req.route.path;
     res.render("login", {
         user: req.user,
-        currentYear,
+        path,
         messages: [req.flash("failedLogIn"), req.flash("PleaseLogIn")]
     });
 });
@@ -296,37 +461,39 @@ router.post("/login", isNotLoggedIn,
         }),
     }),
     passport.authenticate("local", {failureRedirect: "/loginfailed"}),
-    function(req, res) {
-        res.redirect("/index/1");
+    (req, res) =>{
+        res.redirect("/index/1?order=views&direction=-1");
 });
 
-router.get("/loginfailed", isNotLoggedIn, function(req, res){
+router.get("/loginfailed", isNotLoggedIn, (req, res) =>{
     req.flash("failedLogIn", "Login failed! The username or password is incorrect.");
     res.redirect("/login");
 });
 
 //profile
-router.get("/profile", isLoggedIn, function(req,res){
-    Post.find({author: req.user._id}).populate("author").exec(function (err, posts){
+router.get("/profile", isLoggedIn, (req, res) =>{
+    let path = req.route.path;
+    Post.find({author: req.user._id}).populate("author").exec((err, posts) =>{
         if(!err && req.user){
             res.render("profile", {
                 user:req.user, 
                 posts,
-                currentYear,
+                path,
                 messages: [req.flash("passwordChange")] 
             });
         }
         else{
             req.flash("profileFailed", "There was an error loading the profile page. Please try again.");
-            res.redirect("index/1")
+            res.redirect("index/1?order=views&direction=-1")
         }
     })
 });        
 
-router.get("/profile/edit", isLoggedIn, function(req,res){
+router.get("/profile/edit", isLoggedIn, (req, res) =>{
+    let path = req.route.path;
     res.render("profileEdit", {
         user: req.user,
-        currentYear,
+        path,
         messages: [req.flash("passwordMatch"), req.flash("passwordChangeError")]
     });
 });
@@ -338,14 +505,14 @@ router.post("/profile", isLoggedIn,
             password2: Joi.string().min(8).max(256).trim().required(),
         }),
     }),
-    function(req, res) {
+    (req, res) =>{
         if(req.body.password !== req.body.password2) {
             req.flash("passwordMatch", "Please make sure you enter the same password twice.");
             res.redirect("/profile/edit");
         } else {
-            User.findOne({username: req.user.username}).then(function(user){
+            User.findOne({username: req.user.username}).then(user =>{
                 if (user){
-                    user.setPassword(req.body.password, function(err){
+                    user.setPassword(req.body.password, err =>{
                         user.save();
                         req.flash("passwordChange", "You have successfully changed your password.");
                         res.redirect("/profile");
@@ -355,19 +522,101 @@ router.post("/profile", isLoggedIn,
                     res.redirect("/profile/edit");
                 }
             })
+            .catch(err =>{
+                req.flash("passwordChangeError", "There was an error. Please try again");
+                res.redirect("/profile/edit");
+            })
         }
     }
 );
 
-// logout
-router.get("/logout", isLoggedIn, function(req, res){
-    req.logout();
-    req.flash("loggedOut", "You have succesfully logged out!");
-    res.redirect("/index/1");
+router.get("/profile/verify", isLoggedIn, isAdmin, (req, res) =>{
+    let path = req.route.path;
+    Post.find({verified: false}).populate("author").exec((err, posts) =>{
+        if(!err && req.user && req.user.username === "Admin"){
+            res.render("validatePosts", {
+                user:req.user, 
+                posts,
+                path
+            });
+        }
+        else{
+            res.redirect("/profile")
+        }
+    })
+});  
+
+router.get("/profile/comments", isLoggedIn, isAdmin, (req, res) =>{
+    let path = req.route.path;
+    Comment.find({verified: false}).populate("author").exec((err, comments) =>{
+        if(!err && req.user && req.user.username === "Admin"){
+            res.render("validateComments", {
+                user:req.user, 
+                comments,
+                path
+            });
+        }
+        else{
+            res.redirect("/profile")
+        }
+    })
 });
 
+router.get("/profile/users", isLoggedIn, isAdmin, (req, res) =>{
+    let path = req.route.path;
+    User.find({}).populate("author").exec((err, users) =>{
+        if(!err && req.user && req.user.username === "Admin"){
+            res.render("allUsers", {
+                user:req.user, 
+                users,
+                path
+            });
+        }
+        else{
+            res.redirect("/profile")
+        }
+    })
+});  
+
+router.get("/profile/flagusers", (req, res) =>{
+    let change = req.query.change;
+    let userId = req.query.id;
+    User.findByIdAndUpdate(userId, {flagged : change}).exec((err, user) =>{})
+});
+
+// logout
+router.get("/logout", isLoggedIn, (req, res) =>{
+    req.logout();
+    req.flash("loggedOut", "You have succesfully logged out!");
+    res.redirect("/index/1?order=views&direction=-1");
+});
+
+router.get("/about", (req, res) =>{
+    let path = req.route.path;
+    res.render("about", {
+        user: req.user,
+        path
+    });
+})
+
+router.get("/privacy", (req, res) =>{
+    let path = req.route.path;
+    res.render("privacy", {
+        user: req.user,
+        path
+    });
+})
+
+router.get("/terms", (req, res) =>{
+    let path = req.route.path;
+    res.render("terms", {
+        user: req.user,
+        path
+    });
+})
+
 // 404
-router.get("*", function(req, res){
+router.get("*", (req, res) =>{
     res.render("404")
 });
 

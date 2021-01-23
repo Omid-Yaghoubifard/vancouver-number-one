@@ -11,7 +11,24 @@ const Post = new mongoose.Schema({
         type: String,
         enum: ["Natural", "Cultural", "Events", "Man-Made"]
     },
+    rating: {
+        type: Number,
+        default: 0
+    },
+    usersLiking: [{
+        type: String
+    }],
+    views: {
+        type: Number,
+        default: 0
+    },
     image: String,
+    imageAttribute: String,
+    ticketReserve: String,
+    verified: {
+        type: Boolean,
+        default: false
+    },  
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment"

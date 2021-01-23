@@ -1,13 +1,29 @@
         
             <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/corejs-typeahead/1.2.1/bloodhound.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/corejs-typeahead/1.2.1/typeahead.jquery.min.js"></script>
             <script src="/javascript/script.js"></script>
+            <% if(user && (user.username === "Admin")){ %>
+                <script src="/javascript/adminScript.js"></script>
+            <% }; %>
         </div>
     </body>
     
     <footer>
-        <div class="navbar navbar-dark bg-dark">
-            <span class="text-muted mx-auto">Copyright © <%= currentYear %> VANCOUVER NUMBER ONE</span>
-        </div>
+        <% if(path.includes("/index/show")){ %>
+            <div class="navbar navbar-dark bg-dark pb-5 pb-lg-0 footerFont">
+        <% } else{ %>
+            <div class="navbar navbar-dark bg-dark footerFont">
+        <% }; %>
+                <div class="container my-2 d-flex justify-content-center">
+                    <a class="nav-link text-white" href="/">Home</a>
+                    <a class="nav-link text-white" href="/about">About Us</a>
+                    <a class="nav-link text-white" href="/privacy">Privacy Policy</a>
+                    <a class="nav-link text-white" href="/terms">Terms and Conditions</a>
+                </div>
+                <span class="mx-auto mb-2 text-white">Copyright © <%= new Date().getFullYear() %> VANCOUVER GUIDE</span>
+            </div>
     </footer>
 </html>

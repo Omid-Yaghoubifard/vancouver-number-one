@@ -6,7 +6,15 @@ const Comment = new mongoose.Schema({
            type: mongoose.Schema.Types.ObjectId,
            ref: "User"
     }],
-    date: { type: Date, default: Date.now }
+    postId: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post"
+    }],
+    date: { type: Date, default: Date.now },
+    verified: {
+        type: Boolean,
+        default: false
+    },
 });
 
 module.exports = mongoose.model("Comment", Comment);

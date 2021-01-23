@@ -1,26 +1,34 @@
 <%- include("partials/header") %>
 
 <div class="container mt-5 pt-5">
-    <% messages.forEach(function(message){ %>
+    <% messages.forEach(message =>{ %>
         <% if (typeof message === "object" && message.length) { %>
             <p class="fade-out-items text-secondary mb-4 open-sans-font"><%= message %></p>
         <% } %>
     <% }) %>
 
-    <div class="mb-4 profile-title" id="profile-back">
-        <h5>Username: <a href="/profile"> <%= user.username %> </a> </h5>
-        <h5>Email: <a href="/profile"> <%= user.email %> </a> </h5>
-        <h5> Password: <span class="asterisk">**********</span></h5>
+    <div class="mx-auto col-sm-10 col-md-8 col-lg-6 col-xl-5 mb-5 mt-4 shadow-effect main-background p-4" id="profile-back">
+        <h6>Username: <a href="/profile"> <%= user.username %> </a> </h6>
+        <h6>Email: <a href="/profile"> <%= user.email %> </a> </h6>
+        <h6> Password: <span class="asterisk">**********</span></h6>
         <a class="btn btn-secondary" href="profile/edit">Change Your Password</a>
     </div>
+    <% if(user.username === "Admin"){ %>
+        <div class="mt-5 mb-4 ml-3 profile-title">
+            <div class="open-sans-font btn btn-success disabled mt-3">Admin Panel:</div>
+        </div>
+        <a target="_blank" href="/profile/verify" class="btn btn-info ml-3">Verify Posts</a>
+        <a target="_blank" href="/profile/comments" class="btn btn-info ml-3">Verify Comments</a>
+        <a target="_blank" href="/profile/users" class="btn btn-info ml-3">Flag Users</a>
+    <% }; %>
     <% if(posts.length > 0){ %>
         <div class="mt-5 mb-4 profile-title">
-            <h3 class="open-sans-font">Your posts at a glance:</h3>
+            <div class="open-sans-font btn btn-success disabled mt-3">Your Posts at a Glance!</div>
         </div>
     <% } %>
     <div class="row">
         
-        <% posts.forEach(function(post){ %>
+        <% posts.forEach(post =>{ %>
 
             <div class="col-sm-6 col-lg-4 mb-5 very-small">
                 <div class="card-deck">

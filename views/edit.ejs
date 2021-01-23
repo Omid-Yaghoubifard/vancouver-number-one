@@ -1,9 +1,11 @@
 <%- include("partials/header") %>
 
 <div class="container mt-5 pb-5 pt-5">
-    <h4 class="mb-4 text-dark pb-1 open-sans-font">Please edit your post and submit the form.</h4>
     <form method="POST" action="/index/show/<%= post._id %>?_method=PUT" enctype="multipart/form-data">
-        <div class="row">
+        <div class="row shadow-effect main-background m-5 py-5">
+            <div class="input-group col col-12">
+                <h6 class="mb-4 text-dark pb-1 open-sans-font bolden">Please edit your post and submit the form.</h6>
+            </div>
             <div class="input-group mb-3 col-md-8">
                 <input type="text" class="form-control" name="title" value="<%= post.title %>" maxlength="100" required>
             </div>
@@ -36,9 +38,39 @@
             <div class="input-group mb-3 col col-12">
                 <textarea class="form-control" name="body" rows="6" maxlength="5000" required><%= post.body %></textarea>
             </div>
+            <% if(user && (user.username === "Admin")){ %>
+                <div class="input-group mb-3 col col-12">
+                    <input class="form-control mr-2" name="location1" value="<%= post.location[0] %>" required>
+                    <input class="form-control ml-2" name="location2" value="<%= post.location[1] %>" required>
+                </div>
+                <div class="input-group">
+                    <div class="form-group mb-3 col col-12">
+                        <label for="image-atteribute">Image Attribute:</label>
+                        <input class="form-control" id="image-atteribute" type="text" name="imageAttribute" value="<%= post.imageAttribute %>">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="form-group mb-3 col col-12">
+                        <label for="ticket-reserve">Buy a ticket:</label>
+                        <input class="form-control" id="ticket-reserve" type="text" name="ticketReserve" value="<%= post.ticketReserve %>">
+                    </div>
+                </div>
+            <% }; %>
+            <div class="form-group mt-1 mb-5 col">
+                <div class="form-check">
+                    <input class="form-check-input" name="checkbox" type="checkbox" id="gridCheck" required>
+                    <label class="form-check-label" for="gridCheck">
+                        <span>I have read and agree to the <a target="_blank" href="/privacy">Privacy Policy</a> and the <a target="_blank" href="/terms">Terms and Conditions</a>.</span>
+                    </label>
+                </div>
+            </div>
+            <div class="input-group col col-12">
+                <button type="submit" class="btn btn-dark btn-block mb-2 mx-auto">Submit</button>
+            </div>            
+            <div class="input-group col col-12">
+                <a href="/index/show/<%= post._id %>" class="btn btn-secondary btn-block mx-auto">Cancel</a>
+            </div>
         </div>
-        <button type="submit" class="btn btn-dark btn-block mx-auto">Submit</button>
-        <a href="/index/show/<%= post._id %>" class="btn btn-secondary btn-block mx-auto">Cancel</a>
     </form>
 </div>
 

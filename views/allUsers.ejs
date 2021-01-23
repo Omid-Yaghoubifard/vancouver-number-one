@@ -1,0 +1,31 @@
+<%- include("partials/header") %>
+
+<div class="container mt-5 pt-5">
+    <div class="row">
+
+        <table class="table table-hover table-striped table-primary mt-3">
+            <thead>
+                <tr>
+                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">ID / Posts</th>
+                    <th scope="col">Flagged</th>
+                </tr>
+            </thead>
+            <tbody class="tBody">
+                <% users.forEach(item =>{ %>
+                    <% let color = item.flagged ? "btn-danger" : "btn-primary" %>
+                    <tr>
+                        <th scope="row"><%= item.username %></th>
+                        <td><%= item.email %></td>
+                        <td><a target="_blank" href="/users/1?order=views&direction=-1&user=<%= item._id %>"><%= item._id %></a></td>
+                        <td> <button value="<%= item._id %>" class="btn <%= color %> flag-user <%= item.flagged %>"><%= item.flagged %></button> </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<%- include("partials/footer") %>

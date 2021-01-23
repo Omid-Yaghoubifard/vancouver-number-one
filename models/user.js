@@ -4,7 +4,11 @@ const mongoose              = require("mongoose"),
 const User = new mongoose.Schema({
     username: {type: String, index: true, unique:true, required: true},
     email: String,
-    password: String
+    password: String,
+    flagged: {
+      type: Boolean,
+      default: false
+  }
 })
 
 User.index({

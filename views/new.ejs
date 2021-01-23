@@ -1,15 +1,18 @@
 <%- include("partials/header") %>
 
 <div class="container mt-5 pb-5 pt-5">
-    <% messages.forEach(function(message){ %>
+    <% messages.forEach(message =>{ %>
         <% if (typeof message === "object" && message.length) { %>
-            <p class="fade-out-items text-secondary mb-4 open-sans-font"><%= message %></p>
+            <p class="fade-out-items text-secondary mb-4 ml-5 open-sans-font"><%= message %></p>
         <% } %>
     <% }) %>
 
-    <h4 class="mb-4 text-dark pb-1 open-sans-font">Please fill in the following fields and submit the form.</h4>
     <form method="POST" action="/index" enctype="multipart/form-data">
-        <div class="row">
+        <div class="row shadow-effect main-background m-5 py-5">
+            <div class="input-group col col-12">
+                <h6 class="mb-4 text-dark pb-1 bolden open-sans-font">Please fill in the following fields and submit the form.</h6>
+            </div>
+
             <div class="input-group mb-3 col-md-8">
                 <input type="text" class="form-control" name="title" placeholder="Title (Please make sure you enter the official title.)" maxlength="100" required>
             </div>
@@ -42,8 +45,19 @@
             <div class="input-group mb-3 col col-12">
                 <textarea class="form-control" name="body" rows="6" required maxlength="5000" placeholder="Please provide a precise and comprehensive description. (Up to 5,000 characters)"></textarea>
             </div>
+
+            <div class="form-group mt-1 mb-5 col">
+                <div class="form-check">
+                    <input class="form-check-input" name="checkbox" type="checkbox" id="gridCheck" required>
+                    <label class="form-check-label" for="gridCheck">
+                        <span>I have read and agree to the <a target="_blank" href="/privacy">Privacy Policy</a> and the <a target="_blank" href="/terms">Terms and Conditions</a>.</span>
+                    </label>
+                </div>
+            </div>
+            <div class="input-group col col-12">
+                <button type="submit" class="btn btn-secondary btn-block mx-auto">Submit</button>
+            </div>
         </div>
-        <button type="submit" class="btn btn-secondary btn-lg btn-block mx-auto">Submit</button>
     </form>
 </div>
 
