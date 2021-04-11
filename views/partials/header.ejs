@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    
+    <% if(path === "/"){ %>
+      <meta property="og:image" content="https://bcdeveloper.ca/public/images/Vancouver-Guide-Social.png" />
+    <% } %>
     <% if(typeof post === "object" && post){ %>
       <meta name="description" content="<%= post.body.slice(0,210) %> ...">
     <% } else{ %>
@@ -52,7 +54,7 @@
                   </li>
                 <% }else{ %>
                   <li class="nav-item active">
-                    <a class="nav-link text-white" href="/profile">Hello <%= user.username %><span class="sr-only">(current)</span></a>
+                    <a class="nav-link text-white" href="/profile">My Profile<span class="sr-only">(current)</span></a>
                   </li>
                   <% if(user && !user.flagged){ %>
                     <li class="nav-item">

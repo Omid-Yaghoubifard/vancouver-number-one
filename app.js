@@ -36,7 +36,7 @@ mongoose.set("useFindAndModify", false);
 
 app.use(router);
 app.use(errors());
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next)=> {
   if (err instanceof multer.MulterError) {
     res.status(500).send({ Error: "Expected file size: 200 KB to 750 KB | Expected file formats: jpeg, jpg, png, gif, tif, tiff" })
   } else next();
@@ -49,6 +49,6 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.listen(process.env.PORT || 3001, process.env.IP, function(){
+app.listen(process.env.PORT || 3001, process.env.IP, ()=> {
     console.log("Server has started");
 })

@@ -33,13 +33,13 @@
     <div class="row">
         <% posts.forEach(post =>{ %>
             <div class="col-sm-6 col-lg-4 mb-5 very-small">
-                <div class="card-deck">
+                <div class="card-deck hovering-effect">
                     <div class="card">
                         <a href="/index/show/<%= post._id %>"><img class="card-img card-img-top" src="<%= post.image %>" alt="<%= post.title %>"></a>
                         <div class="card-body">
                             <h5 class="card-title"><%= post.title %></h5>
                             <p class="card-text"><%= post.body.slice(0,100) %> ...</p>
-                            <a href="/index/show/<%= post._id %>" class= "btn btn-outline-success">Read more</a>
+                            <a href="/index/show/<%= post._id %>" class= "btn btn-outline-success hovering-effect-button">Read more</a>
                         </div>
                     </div>
                 </div>

@@ -12,7 +12,7 @@ const Storage = multer.diskStorage({
 const upload = multer({
     storage: Storage,
     fileFilter: function(req, file, callback) {
-        let extname = file.originalname.toLowerCase().match(/.(jpeg|jpg|png|gif|gif|tif|tiff)$/);
+        let extname = file.originalname.toLowerCase().match(/.(jpeg|jpg|png|gif|tif|tiff)$/);
         let mimetype = file.mimetype.match(/(jpeg|jpg|png|gif|gif|tif|tiff)$/);
         if(mimetype && extname) callback(null,true);
         else callback(new multer.MulterError ("Error: Images Only"));

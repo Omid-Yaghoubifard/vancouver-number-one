@@ -32,6 +32,18 @@ $(".like-button").on("click", function(){
     $(this).find("i").toggleClass("far").toggleClass("fas");
 });
 
+$(".contact-form").on("submit", e =>{
+    e.preventDefault();
+    let name = $("#form-name").val().trim();
+    let email = $("#form-email").val().trim();
+    let message = $("#form-message").val().trim();
+    let data = {name, email, message};
+    $("#form-name").val("");
+    $("#form-email").val("");
+    $("#form-message").val("");
+    $.post("/contact", data, function(){})
+});
+
 // Bloodhound with Remote + Prefetch
 let wordSuggestions = new Bloodhound({
     datumTokenizer: Bloodhound.tokenizers.obj.whitespace("word"),

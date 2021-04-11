@@ -6,6 +6,7 @@ const express            = require("express"),
       Comment            = require("./models/comment"),
       isLoggedIn         = require("./middlewares/isLoggedIn"),
       isNotLoggedIn      = require("./middlewares/isNotLoggedIn"),
+      isNotFlagged       = require("./middlewares/isNotFlagged"),
       loggedInUser       = require("./middlewares/loggedInUser"),
       isAdmin            = require("./middlewares/isAdmin"),
       upload             = require("./middlewares/upload"),
@@ -13,6 +14,7 @@ const express            = require("express"),
       { celebrate, Joi } = require("celebrate"),
       Filter             = require('bad-words'),
       filter             = new Filter(),
+      nodemailer         = require("nodemailer"),
       fs                 = require("fs");
 
 
@@ -27,7 +29,7 @@ router.get("/", (req, res) =>{
 });
 
 // new
-router.get("/index/new", isLoggedIn, (req, res) =>{
+router.get("/index/new", isLoggedIn, isNotFlagged, (req, res) =>{
     let path = req.route.path;
     res.render("new", {
         user: req.user,
@@ -136,7 +138,7 @@ router.get("/users/:page", (req, res, next) =>{
 });
 
 // create
-router.post("/index", isLoggedIn, upload.single("image"),
+router.post("/index", isLoggedIn, isNotFlagged, upload.single("image"),
     celebrate({
         body: Joi.object().keys({
             title: Joi.string().max(100).trim().lowercase().required(),
@@ -192,7 +194,7 @@ router.get("/index/show/:id", (req, res) =>{
                 WEATHERAPI: process.env.WEATHERAPI, 
                 MAP: process.env.MAPAPI,
                 path,
-                messages: [req.flash("postCreated"), req.flash("updated"), req.flash("deleteError"), req.flash("notYourPost"), req.flash("editError"), req.flash("commentError"), req.flash("commentApprove")]  
+                messages: [req.flash("postCreated"), req.flash("updated"), req.flash("deleteError"), req.flash("notYourPost"), req.flash("editError"), req.flash("commentError")]  
             });
         } else{
             req.flash("errorMessage", "Sorry. There was an error. Please try again");
@@ -221,7 +223,7 @@ router.get("/deleteComment", isLoggedIn, isAdmin, (req, res) =>{
     });
 });
 
-router.get("/updateRating", (req, res) =>{
+router.get("/updateRating", isLoggedIn, (req, res) =>{
     let change = req.query.change;
     let postId = req.query.id;
     Post.findByIdAndUpdate(postId, {$inc : {rating : change}}).exec((err, post) =>{
@@ -339,7 +341,7 @@ router.put("/index/show/:id", isLoggedIn, loggedInUser, upload.single("image"),
 );
 
 //comment
-router.post("/index/show/:id", isLoggedIn,
+router.post("/index/show/:id", isLoggedIn, isNotFlagged,
     celebrate({
         body: Joi.object().keys({
             text: Joi.string().max(1000).trim().required(),
@@ -355,7 +357,6 @@ router.post("/index/show/:id", isLoggedIn,
             newComment, (err, createdComment) =>{
                 if(!err){
                     Post.findByIdAndUpdate(req.params.id, {$push: {comments: createdComment._id}}, (err, updated) =>{
-                        req.flash("commentApprove", "Your comment will be published shortly after being reviewed by an admin.");
                         res.redirect(`/index/show/${req.params.id}`);
                     })
                 } else{
@@ -578,7 +579,7 @@ router.get("/profile/users", isLoggedIn, isAdmin, (req, res) =>{
     })
 });  
 
-router.get("/profile/flagusers", (req, res) =>{
+router.get("/profile/flagusers", isLoggedIn, isAdmin, (req, res) =>{
     let change = req.query.change;
     let userId = req.query.id;
     User.findByIdAndUpdate(userId, {flagged : change}).exec((err, user) =>{})
@@ -614,6 +615,40 @@ router.get("/terms", (req, res) =>{
         path
     });
 })
+
+router.get("/contact", (req, res) =>{
+    let path = req.route.path;
+    res.render("contact", {
+        user: req.user,
+        path
+    });
+})
+
+router.post("/contact",
+    celebrate({
+        body: Joi.object().keys({
+            name: Joi.string().max(1024).trim().required(),
+            email: Joi.string().max(256).email().lowercase().trim().required(),
+            message: Joi.string().max(5096).trim().required()
+        }),
+    }),
+    (req, res) =>{
+        let transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.PASSWORD
+            },
+        });
+        let info = {
+            from: req.body.email,
+            to: process.env.EMAILTO,
+            subject: `Vancouver Guide Message | name: ${req.body.name} | email: ${req.body.email}`,
+            text: req.body.message
+        };
+        transporter.sendMail(info, (err, sent)=>{})
+    }
+);
 
 // 404
 router.get("*", (req, res) =>{
